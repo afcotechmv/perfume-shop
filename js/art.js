@@ -34,7 +34,7 @@ function art(p){
      lab:'',hl:'<path d="M160 262c-4 16 0 34 12 48" stroke="#fff" stroke-opacity=".3" stroke-width="6" fill="none" stroke-linecap="round"/>'}
   ][kind];
   const glass=`fill="url(#${id}l)" stroke="hsl(${h} 45% 82% / .5)" stroke-width="1.6"`;
-  return `<svg viewBox="0 0 400 400" role="img" aria-label="${esc(p.name)}" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(p.name)}" xmlns="http://www.w3.org/2000/svg">
   <defs>
    <radialGradient id="${id}b" cx="50%" cy="36%" r="80%"><stop offset="0" stop-color="hsl(${h} 38% 25%)"/><stop offset="1" stop-color="hsl(${h} 32% 6%)"/></radialGradient>
    <radialGradient id="${id}h" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="hsl(${h} 75% 55%)" stop-opacity=".4"/><stop offset="1" stop-color="hsl(${h} 75% 55%)" stop-opacity="0"/></radialGradient>

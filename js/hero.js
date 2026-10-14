@@ -24,7 +24,7 @@ function initHero(){
     dots.forEach((d,i)=>d.classList.toggle('on',i===n));
     if(hc)hc.textContent=String(n+1).padStart(2,'0');
     cur=n;busy=true;
-    setTimeout(()=>{old.classList.remove('leaving');busy=false},reduce?0:600);
+    setTimeout(()=>{old.classList.remove('leaving');busy=false},reduce?0:1000);
     startBar();
   }
   const next=()=>show(cur+1,'next'),prev=()=>show(cur-1,'prev');

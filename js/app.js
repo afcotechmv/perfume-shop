@@ -5,12 +5,14 @@ function updateChrome(){
   $('#cc').textContent=S.cart.reduce((s,c)=>s+c.qty,0);
   $('#acct').textContent=S.user?(S.user.name||'Account').split(' ')[0]:'Sign in';
   const h=location.hash.split('?')[0];
-  $('#mainnav').innerHTML=`<a href="#/" class="${h==='#/'||h===''?'on':''}">Home</a><a href="#/shop" class="${h==='#/shop'?'on':''}">Collection</a>${isAdmin()?`<a href="#/admin" class="${h==='#/admin'?'on':''}">Admin</a>`:''}`;
+  const f=S.filter,onShop=h==='#/shop';
+  $('#mainnav').innerHTML=`<a href="#/shop" class="${onShop&&f.aud==='All'?'on':''}" data-act="clear" data-go="1">Collection</a>${AUDS.map(a=>`<button class="${onShop&&f.aud===a?'on':''}" data-act="aud" data-v="${a}" data-go="1">${aLabel(a)}</button>`).join('')}${isAdmin()?`<a href="#/admin" class="${h==='#/admin'?'on':''}">Admin</a>`:''}`;
+  const an=$('#ann');if(an)an.textContent=`Free delivery in Malé on orders above MVR ${CFG.delivery.maleFreeAbove}. Delivery to the islands is arranged with you.`;
 }
 function renderDrawer(){
   const L=cartLines();
-  $('#drawer').innerHTML=`<div class="dh"><b>Your cart</b><button class="ibtn" data-act="closeall" aria-label="Close">✕</button></div>
-  <div class="db">${L.length?L.map(lineHtml).join(''):'<div class="empty" style="margin-top:20px">Cart is empty</div>'}</div>
+  $('#drawer').innerHTML=`<div class="dh"><b>Your bag</b><button class="ibtn" data-act="closeall" aria-label="Close">✕</button></div>
+  <div class="db">${L.length?L.map(lineHtml).join(''):'<div class="empty" style="margin-top:20px">Your bag is empty</div>'}</div>
   <div class="df">${sumHtml().replace(/<div><span>Delivery.*?<\/div>/,'')}<a class="btn block" href="#/cart" data-act="closeall" style="margin-bottom:8px">View cart</a><a class="btn ghost block" href="#/checkout" data-act="closeall">Checkout</a></div>`;
   if(location.hash.startsWith('#/cart')||location.hash.startsWith('#/checkout'))render(true);
 }
@@ -31,7 +33,6 @@ async function render0(keepScroll){
   const y=window.scrollY;
   $('#app').innerHTML=html;
   const sel=$('select[data-in=sort]');if(sel)sel.value=S.filter.sort;
-  const bsel=$('select[data-in=brand]');if(bsel)bsel.value=S.filter.brand;
   initHero();
   initGallery();
   updateChrome();
@@ -46,12 +47,15 @@ document.addEventListener('click',async e=>{
   if(a==='add'){const n=el.dataset.q==='pd'?S.pdQty:1;addToCart(id,n)}
   else if(a==='drawer')openDrawer();
   else if(a==='closeall')closeAll();
-  else if(a==='theme'){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0e0b0c';r.dataset.theme=dark?'light':'dark'}
-  else if(a==='cat'||a==='aud'){
-    if(el.dataset.go)S.filter={...S.filter,cat:'All',aud:'All',brand:'All',q:''};
-    S.filter[a]=el.dataset.v;
-    if(el.dataset.go){location.hash='#/shop'}else refreshGrid();
+  else if(a==='theme'){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#150b14';r.dataset.theme=dark?'light':'dark'}
+  else if(a==='cat'||a==='aud'||a==='brand'||a==='clear'){
+    if(el.dataset.go||a==='clear')S.filter={...S.filter,cat:'All',aud:'All',brand:'All',q:'',inStock:false};
+    if(a!=='clear')S.filter[a]=el.dataset.v;
+    if(el.dataset.go){if(location.hash.split('?')[0]==='#/shop'){render(true);window.scrollTo(0,0)}else location.hash='#/shop'}
+    else if(location.hash.split('?')[0]==='#/shop'){refreshGrid();const q=$('#q');if(q)q.value=S.filter.q;const st=$('input[data-in=stock]');if(st)st.checked=S.filter.inStock}
+    else render(true);
   }
+  else if(a==='ftoggle'){const sd=$('#side');if(sd)sd.classList.toggle('open')}
   else if(a==='pdq'){const p=getP(location.hash.split('/')[2]);S.pdQty=Math.max(1,Math.min(p?Math.max(1,p.stock):1,S.pdQty+ +el.dataset.d));render(true)}
   else if(a==='qty'){const c=S.cart.find(x=>x.id===id);setQty(id,(c?c.qty:0)+ +el.dataset.d);if(!location.hash.startsWith('#/cart')&&!location.hash.startsWith('#/checkout'))render(true)}
   else if(a==='rm'){setQty(id,0)}
@@ -76,8 +80,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',async e=>{
   const t=e.target,k=t.dataset.in;
-  if(k==='brand'){S.filter.brand=t.value;refreshGrid()}
-  else if(k==='sort'){S.filter.sort=t.value;refreshGrid()}
+  if(k==='sort'){S.filter.sort=t.value;refreshGrid()}
   else if(k==='stock'){S.filter.inStock=t.checked;refreshGrid()}
   else if(t.name==='area'){S.area=t.value;$('#islandf').style.display=t.value==='island'?'grid':'none';$('#cosum').innerHTML=sumHtml(true)}
   else if(t.name==='mk'){$('#pw').style.display=t.checked?'block':'none'}

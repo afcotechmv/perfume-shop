@@ -1,53 +1,87 @@
 "use strict";
-/* AURELLE — storefront views: home, catalogue, product, cart, checkout, order confirmation. */
+/* AURELLE — storefront views: home, collection, product, bag, checkout, order confirmation. */
 /* ============ VIEWS ============ */
-const stBadge=p=>p.stock<=0?'<span class="st bad">Out of stock</span>':p.stock<=CFG.lowStock?`<span class="st warn">Only ${p.stock} left</span>`:'<span class="st ok">In stock</span>';
+const stBadge=p=>p.stock<=0?'<span class="st bad">Sold out</span>':p.stock<=CFG.lowStock?`<span class="st warn">Only ${p.stock} left</span>`:'<span class="st ok">In stock</span>';
 const aLabel=a=>({Men:"Men's",Women:"Women's",Unisex:'Unisex'}[a]||a||'');
-function card(p){return `<article class="card"><a class="thumb" href="#/product/${p.id}">${pic(p)}</a><div class="cbody">
-  <div class="mono">${esc(p.brand||p.category)}</div><a class="cname" href="#/product/${p.id}">${esc(p.name)}</a>
-  <div class="sub">${esc([aLabel(p.audience),p.category].filter(Boolean).join(' · '))}</div>
-  <div class="row"><span class="price">${fmt(p.price)}</span>${stBadge(p)}</div>
-  <button class="btn" data-act="add" data-id="${p.id}" ${p.stock<=0?'disabled':''}>${p.stock<=0?'Unavailable':'Add to cart'}</button></div></article>`}
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+/* accent-insensitive search: "vetiver" finds Vétiver */
+const fold=t=>String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const countBy=fn=>S.products.filter(fn).length;
+/* Fragrance notes (rows labelled Top / Heart / Base) are shown as a pyramid; every other detail row is a plain fact. */
+const noteRx=/^(top|heart|base)\b/i;
+const splitSpecs=p=>{const s=Array.isArray(p.specs)?p.specs:[];return{notes:s.filter(r=>noteRx.test(r[0])),rest:s.filter(r=>!noteRx.test(r[0]))}};
+const kindOf=p=>[aLabel(p.audience),p.category].filter(Boolean).join(', ');
+const stockFlag=p=>p.stock<=0?'Sold out':p.stock<=CFG.lowStock?`Only ${p.stock} left`:'';
+
+function card(p){const f=stockFlag(p);return `<article class="card ${p.stock<=0?'gone':''}"><a class="thumb" href="#/product/${p.id}">${pic(p)}${f?`<span class="flag">${f}</span>`:''}</a><div class="cbody">
+  <span class="by">${esc(p.brand||p.category)}</span><a class="cname" href="#/product/${p.id}">${esc(p.name)}</a>
+  <span class="kind">${esc(kindOf(p))}</span><span class="price">${fmt(p.price)}</span>
+  <button class="add" data-act="add" data-id="${p.id}" ${p.stock<=0?'disabled':''}>${p.stock<=0?'Sold out':'Add to bag'}</button></div></article>`}
 function filtered(){
-  const f=S.filter;let a=S.products.filter(p=>(f.cat==='All'||p.category===f.cat)&&(f.aud==='All'||p.audience===f.aud)&&(f.brand==='All'||p.brand===f.brand)&&(!f.inStock||p.stock>0)&&(!f.q||(p.name+' '+p.brand+' '+aLabel(p.audience)+' '+p.category+' '+p.description).toLowerCase().includes(f.q.toLowerCase())));
+  const f=S.filter;let a=S.products.filter(p=>(f.cat==='All'||p.category===f.cat)&&(f.aud==='All'||p.audience===f.aud)&&(f.brand==='All'||p.brand===f.brand)&&(!f.inStock||p.stock>0)&&(!f.q||fold(p.name+' '+p.brand+' '+aLabel(p.audience)+' '+p.category+' '+p.description+' '+(p.specs||[]).map(s=>s[1]).join(' ')).includes(fold(f.q))));
   const s={price_asc:(x,y)=>x.price-y.price,price_desc:(x,y)=>y.price-x.price,name:(x,y)=>x.name.localeCompare(y.name),featured:(x,y)=>(!!y.featured)-(!!x.featured)}[f.sort];
   return a.sort(s);
 }
-function gridHtml(){const a=filtered();return a.length?a.map(card).join(''):'<div class="empty" style="grid-column:1/-1">No products match the current filters.</div>'}
+function gridHtml(){const a=filtered();return a.length?a.map(card).join(''):'<div class="empty" style="grid-column:1/-1">No fragrances match these filters. <button class="link" data-act="clear">Clear filters</button></div>'}
+
+/* Collection page: filter sidebar on the left, tall product cards on the right. */
+function facet(title,items,act,cur){return `<div class="facet"><h3>${title}</h3><ul>${items.map(([v,l,n])=>`<li><button class="fi ${cur===v?'on':''}" data-act="${act}" data-v="${esc(v)}"><span>${esc(l)}</span><i>${n}</i></button></li>`).join('')}</ul></div>`}
+function facetsHtml(){const f=S.filter,all=S.products.length;
+  return facet('For',[['All','Everyone',all],...AUDS.map(a=>[a,aLabel(a),countBy(p=>p.audience===a)])],'aud',f.aud)
+   +facet('Scent family',[['All','All families',all],...cats().slice(1).map(c=>[c,c,countBy(p=>p.category===c)])],'cat',f.cat)
+   +facet('Maison',[['All','All maisons',all],...brands().map(b=>[b,b,countBy(p=>p.brand===b)])],'brand',f.brand)}
+const isFiltered=()=>{const f=S.filter;return f.cat!=='All'||f.aud!=='All'||f.brand!=='All'||f.q||f.inStock};
+const activeHtml=()=>isFiltered()?'<button class="link" data-act="clear">Clear all filters</button>':'';
 function catalogue(){
   const f=S.filter;
-  return `<h2 class="sec" id="catalogue">The Collection <span class="mono" id="count">${filtered().length} products</span></h2>
-  <div class="toolbar"><input type="search" id="q" placeholder="Search fragrances, brands, notes" value="${esc(f.q)}" data-in="q">
-  <select data-in="brand" aria-label="Brand"><option value="All">All brands</option>${brands().map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('')}</select><span class="sp"></span>
-  <label class="chk"><input type="checkbox" data-in="stock" ${f.inStock?'checked':''}> In stock only</label>
-  <select data-in="sort" aria-label="Sort"><option value="featured">Featured</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option><option value="name">Name</option></select></div>
-  <div class="toolbar"><span class="mono lbl">For</span><div class="pills" id="apills">${apillsHtml()}</div></div>
-  <div class="toolbar"><span class="mono lbl">Category</span><div class="pills" id="pills">${pillsHtml()}</div></div>
-  <div class="grid" id="grid">${gridHtml()}</div>`;
+  return `<div class="shop"><aside class="side" id="side"><div class="sq"><input type="search" id="q" placeholder="Name, note or maison" value="${esc(f.q)}" data-in="q" aria-label="Search the collection"></div>
+  <div id="facets">${facetsHtml()}</div>
+  <label class="chk"><input type="checkbox" data-in="stock" ${f.inStock?'checked':''}> Only what is in stock</label></aside>
+  <section class="results"><div class="rhead"><h1 class="rt">The collection</h1><span class="mono" id="count">${plural(filtered().length,'fragrance')}</span><span class="sp"></span>
+  <button class="btn ghost sm fbtn" data-act="ftoggle">Filters</button>
+  <select data-in="sort" aria-label="Sort"><option value="featured">Featured first</option><option value="price_asc">Price, low to high</option><option value="price_desc">Price, high to low</option><option value="name">Name</option></select></div>
+  <div id="active" class="fclear">${activeHtml()}</div>
+  <div class="grid" id="grid">${gridHtml()}</div></section></div>`;
 }
-const pillsHtml=()=>cats().map(c=>`<button class="pill ${S.filter.cat===c?'on':''}" data-act="cat" data-v="${esc(c)}">${esc(c)}</button>`).join('');
-const apillsHtml=()=>['All',...AUDS].map(a=>`<button class="pill ${S.filter.aud===a?'on':''}" data-act="aud" data-v="${a}">${a==='All'?'All':aLabel(a)}</button>`).join('');
-function refreshGrid(){const g=$('#grid');if(!g)return;g.innerHTML=gridHtml();$('#count').textContent=filtered().length+' products';$('#pills').innerHTML=pillsHtml();$('#apills').innerHTML=apillsHtml()}
+function refreshGrid(){const g=$('#grid');if(!g)return;g.innerHTML=gridHtml();$('#count').textContent=plural(filtered().length,'fragrance');$('#facets').innerHTML=facetsHtml();$('#active').innerHTML=activeHtml()}
 
+/* Hero: a dark stage tinted by each fragrance, an arched window with the bottle, the notes pyramid on one side and the details on the other. */
 function heroSlide(h,i,n){
-  const hue=Number.isFinite(+h.hue)?+h.hue:200;
-  return `<article class="slide ${i===0?'active':''}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${n}"><div class="copy"><span class="mono">Signature fragrance${h.brand?' · '+esc(h.brand):''}</span><h1>${esc(h.name).replace(/^(\S+)/,'<em>$1</em>')}</h1>
-   <p>${esc(h.description)}</p><div class="chips">${(h.specs||[]).slice(0,3).map(s=>`<span class="chip">${esc(s[1])}</span>`).join('')}</div>
-   <div class="row"><span class="price">${fmt(h.price)}</span><button class="btn" data-act="add" data-id="${h.id}">Add to cart</button><a class="btn ghost" href="#/product/${h.id}">View details</a></div></div>
-   <div class="art" style="--h:${hue}"><div class="glow"></div><div class="art-in"><div class="float">${pic(h,{eager:true})}</div></div></div></article>`;
+  const hue=Number.isFinite(+h.hue)?+h.hue:30,sp=splitSpecs(h),list=(sp.notes.length?sp.notes:sp.rest).slice(0,3);
+  const gs=Math.max(6,Math.min(14,184/Math.max(8,h.name.length)));
+  return `<article class="slide ${i===0?'active':''}" style="--h:${hue};--gs:${gs.toFixed(1)}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${n}">
+   <div class="hname" aria-hidden="true">${esc(h.name)}</div>
+   <div class="frame">
+    <ul class="tiers">${list.map(s=>`<li><span>${esc(s[0])}</span>${esc(s[1])}</li>`).join('')}</ul>
+    <div class="arch"><div class="archin">${pic(h,{eager:true})}</div></div>
+    <div class="copy"><span class="by">${esc(h.brand||h.category)}</span><h1>${esc(h.name)}</h1><p>${esc(h.description)}</p>
+     <div class="row"><span class="price">${fmt(h.price)}</span><button class="btn" data-act="add" data-id="${h.id}">Add to bag</button></div>
+     <a class="more" href="#/product/${h.id}">Discover this fragrance</a></div>
+   </div></article>`;
 }
+const sparks=()=>`<div class="sparks" aria-hidden="true">${Array.from({length:12},(_,i)=>`<i style="--x:${(i*53+11)%96}%;--y:${(i*37+7)%80+6}%;--d:${(i%6)*.8}s;--s:${6+(i*7)%9}px"></i>`).join('')}</div>`;
 function viewHome(){
   let hs=S.products.filter(p=>p.featured&&p.stock>0).slice(0,CFG.heroMax||5);
   if(!hs.length){const f=S.products.find(p=>p.stock>0);if(f)hs=[f]}
-  const n=hs.length,pad=v=>String(v).padStart(2,'0');
-  const ui=n>1?`<button class="hbtn prev" data-hero="prev" aria-label="Previous product">‹</button><button class="hbtn next" data-hero="next" aria-label="Next product">›</button>
-   <div class="hcount mono"><b id="hc">01</b> / ${pad(n)}</div>
-   <div class="hdots">${hs.map((_,i)=>`<button class="hdot ${i===0?'on':''}" data-hero="${i}" aria-label="Show product ${i+1}"></button>`).join('')}</div>
-   <div class="hbar"><i id="hbar"></i></div>`:'';
-  const hero=n?`<section class="hero" id="hero" data-dir="next" role="region" aria-roledescription="carousel" aria-label="Featured products"><div class="slides">${hs.map((h,i)=>heroSlide(h,i,n)).join('')}</div>${ui}</section>`:'';
-  const tiles=`<div class="mono tl">Shop by</div><div class="tiles">${AUDS.map(a=>`<button class="tile aud" data-act="aud" data-v="${a}" data-go="1"><span class="mono">Fragrances for</span><b>${aLabel(a)}</b><span class="mono">${S.products.filter(p=>p.audience===a).length} products</span></button>`).join('')}</div>
-  <div class="tiles">${cats().slice(1).map(c=>`<button class="tile" data-act="cat" data-v="${esc(c)}" data-go="1"><span class="mono">Category</span><b>${esc(c)}</b><span class="mono">${S.products.filter(p=>p.category===c).length} products</span></button>`).join('')}</div>`;
-  return hero+tiles+catalogue();
+  const n=hs.length;
+  const ui=n>1?`<div class="htabs" role="group" aria-label="Choose a fragrance">${hs.map((h,i)=>`<button class="hdot ${i===0?'on':''}" data-hero="${i}">${esc(h.name)}</button>`).join('')}</div><div class="hbar"><i id="hbar"></i></div>`:'';
+  const hero=n?`<section class="hero" id="hero" role="region" aria-roledescription="carousel" aria-label="Featured fragrances">${sparks()}<div class="slides">${hs.map((h,i)=>heroSlide(h,i,n)).join('')}</div>${ui}</section>`:'';
+
+  const rep=a=>S.products.find(p=>p.audience===a&&p.stock>0)||S.products.find(p=>p.audience===a);
+  const portals=AUDS.map(a=>{const p=rep(a);return p?`<button class="portal" data-act="aud" data-v="${a}" data-go="1"><span class="parch">${pic(p)}</span><span class="plabel"><b>${aLabel(a)}</b><span>${plural(countBy(x=>x.audience===a),'fragrance')}</span></span></button>`:''}).join('');
+  const houses=brands().map(b=>`<button class="house" data-act="brand" data-v="${esc(b)}" data-go="1">${esc(b)}</button>`).join('');
+  const rail=[...S.products].sort((x,y)=>(!!y.featured)-(!!x.featured)).slice(0,8).map(card).join('');
+  const fams=cats().slice(1).map(c=>`<button class="fam" data-act="cat" data-v="${esc(c)}" data-go="1"><span>${esc(c)}</span><i>${countBy(p=>p.category===c)}</i></button>`).join('');
+  return hero+`
+  <section class="sect"><div class="sech"><h2>Who are you shopping for?</h2></div><div class="portals">${portals}</div></section>
+  <section class="bleed"><div class="wrap"><div class="sech mid"><h2>The maisons</h2></div><div class="houses">${houses}</div></div></section>
+  <section class="sect"><div class="sech"><h2>Signature fragrances</h2><a class="more" href="#/shop">See the whole collection</a></div><div class="rail">${rail}</div></section>
+  <section class="sect"><div class="sech"><h2>Browse by scent family</h2></div><div class="fams">${fams}</div></section>
+  <section class="bleed"><div class="wrap"><div class="promise">
+   <div><h3>Delivery in Malé</h3><p>Free on orders above MVR ${CFG.delivery.maleFreeAbove}. Below that, MVR ${CFG.delivery.maleFee}.</p></div>
+   <div><h3>Delivery to the islands</h3><p>We arrange it with you and hand your order to the island supply boat.</p></div>
+   <div><h3>Pay when it arrives</h3><p>Cash on delivery or pickup, or a bank transfer after you order.</p></div>
+  </div></div></section>`;
 }
 function viewShop(){return catalogue()}
 
@@ -57,7 +91,7 @@ function gallery(p){
   if(!imgs.length)return `<div class="pleft"><div class="pimg">${art(p)}</div></div>`;
   const n=imgs.length;
   const slides=imgs.map((u,i)=>`<div class="gs ${i===0?'active':''}"><img src="${esc(u)}" alt="${esc(p.name)} (${i+1} of ${n})" ${i===0?'fetchpriority="high"':'loading="lazy"'} decoding="async" draggable="false"></div>`).join('');
-  const ui=n>1?`<button class="gbtn prev" data-g="prev" aria-label="Previous image">‹</button><button class="gbtn next" data-g="next" aria-label="Next image">›</button><div class="gcount mono"><b id="gc">1</b> / ${n}</div>`:'';
+  const ui=n>1?`<button class="gbtn prev" data-g="prev" aria-label="Previous image">‹</button><button class="gbtn next" data-g="next" aria-label="Next image">›</button><div class="gcount mono"><b id="gc">1</b> of ${n}</div>`:'';
   const thumbs=n>1?`<div class="gthumbs">${imgs.map((u,i)=>`<button class="gt ${i===0?'on':''}" data-g="${i}" aria-label="Show image ${i+1}"><img src="${esc(u)}" alt="" loading="lazy" decoding="async" draggable="false"></button>`).join('')}</div>`:'';
   return `<div class="pleft"><div class="pimg gallery" id="gallery" role="region" aria-roledescription="carousel" aria-label="Product images"><div class="gslides">${slides}</div>${ui}</div>${thumbs}</div>`;
 }
@@ -65,17 +99,18 @@ function viewProduct(id){
   const p=getP(id);if(!p)return '<div class="empty" style="margin-top:30px">Product not found. <a href="#/shop" style="color:var(--accent)">Back to the collection</a></div>';
   const q=Math.min(S.pdQty,Math.max(1,p.stock));S.pdQty=q;
   const rel=S.products.filter(x=>x.id!==p.id&&((p.brand&&x.brand===p.brand)||x.category===p.category)).sort((a,b)=>(b.brand===p.brand)-(a.brand===p.brand)).slice(0,4);
+  const sp=splitSpecs(p);
   return `<div class="crumb"><a href="#/">Home</a> / <a href="#/shop">Collection</a> / ${esc(p.category)}</div>
   <div class="pgrid">${gallery(p)}<div class="pinfo">
-  <span class="mono">${esc(p.brand||p.category)}</span><h1>${esc(p.name)}</h1>
-  <div class="sub" style="margin:-4px 0 12px">${esc([aLabel(p.audience),p.category].filter(Boolean).join(' · '))} <span class="mono" style="margin-left:6px">SKU ${esc(p.sku||String(p.id).slice(0,8)).toUpperCase()}</span></div>
-  <div class="row" style="margin-bottom:14px"><span class="price">${fmt(p.price)}</span>${stBadge(p)}</div>
-  <p style="color:var(--muted)">${esc(p.description)}</p>
-  <div class="row" style="margin:20px 0"><div class="qty"><button data-act="pdq" data-d="-1">−</button><span>${q}</span><button data-act="pdq" data-d="1">+</button></div>
-  <button class="btn" data-act="add" data-id="${p.id}" data-q="pd" ${p.stock<=0?'disabled':''}>${p.stock<=0?'Out of stock':'Add to cart'}</button></div>
-  <h3 class="mono" style="margin:26px 0 6px">Fragrance details</h3>
-  <table class="specs">${(p.specs||[]).map(s=>`<tr><td>${esc(s[0])}</td><td>${esc(s[1])}</td></tr>`).join('')||'<tr><td colspan="2">No details listed.</td></tr>'}</table></div></div>
-  ${rel.length?`<h2 class="sec">You may also like</h2><div class="grid">${rel.map(card).join('')}</div>`:''}`;
+  <span class="by">${esc(p.brand||p.category)}</span><h1>${esc(p.name)}</h1>
+  <div class="kind">${esc(kindOf(p))}</div>
+  <div class="row pr"><span class="price">${fmt(p.price)}</span>${stBadge(p)}</div>
+  <p class="desc">${esc(p.description)}</p>
+  ${sp.notes.length?`<div class="pyramid" aria-label="Fragrance notes">${sp.notes.map(s=>`<div class="tier"><span>${esc(s[0])}</span><b>${esc(s[1])}</b></div>`).join('')}</div>`:''}
+  <div class="row buy"><div class="qty"><button data-act="pdq" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-act="pdq" data-d="1" aria-label="More">+</button></div>
+  <button class="btn" data-act="add" data-id="${p.id}" data-q="pd" ${p.stock<=0?'disabled':''}>${p.stock<=0?'Sold out':'Add to bag'}</button></div>
+  <dl class="facts">${sp.rest.map(s=>`<div><dt>${esc(s[0])}</dt><dd>${esc(s[1])}</dd></div>`).join('')}<div><dt>Reference</dt><dd>${esc(p.sku||String(p.id).slice(0,8)).toUpperCase()}</dd></div></dl></div></div>
+  ${rel.length?`<section class="sect"><div class="sech"><h2>You may also like</h2></div><div class="grid">${rel.map(card).join('')}</div></section>`:''}`;
 }
 
 function lineHtml(l){return `<div class="line"><a class="lt" href="#/product/${l.p.id}">${pic(l.p)}</a>
@@ -89,8 +124,8 @@ function sumHtml(co){const t=totals(co);
   <div class="tot"><span>Total</span><span>${fmt(t.total)}</span></div></div>`}
 function viewCart(){
   const L=cartLines();
-  if(!L.length)return '<h2 class="sec">Shopping cart</h2><div class="empty">Your cart is empty. <a href="#/shop" style="color:var(--accent)">Browse the collection</a></div>';
-  return `<h2 class="sec">Shopping cart <span class="mono">${L.reduce((s,l)=>s+l.qty,0)} items</span></h2>
+  if(!L.length)return '<h2 class="sec">Shopping bag</h2><div class="empty">Your bag is empty. <a href="#/shop" style="color:var(--accent)">Browse the collection</a></div>';
+  return `<h2 class="sec">Shopping bag <span class="mono">${L.reduce((s,l)=>s+l.qty,0)} items</span></h2>
   <div class="cols"><div class="panel">${L.map(lineHtml).join('')}</div>
   <div class="panel"><h3 style="margin-top:0">Order summary</h3>${sumHtml()}<p class="mono">Delivery is calculated at checkout.</p><a class="btn block" href="#/checkout">Checkout</a></div></div>`;
 }
@@ -98,7 +133,7 @@ function viewCart(){
 function fld(name,label,val='',opts={}){return `<div class="field" data-f="${name}"><label>${label}</label><input name="${name}" type="${opts.type||'text'}" value="${esc(val)}" autocomplete="${opts.ac||'on'}" placeholder="${esc(opts.ph||'')}"><div class="em">${opts.err||'Required'}</div></div>`}
 function viewCheckout(){
   const L=cartLines();
-  if(!L.length)return '<h2 class="sec">Checkout</h2><div class="empty">Your cart is empty. <a href="#/shop" style="color:var(--accent)">Browse the collection</a></div>';
+  if(!L.length)return '<h2 class="sec">Checkout</h2><div class="empty">Your bag is empty. <a href="#/shop" style="color:var(--accent)">Browse the collection</a></div>';
   const u=S.user||{},nm=(u.name||'').split(' ');
   return `<h2 class="sec">Checkout <span class="mono">${S.user?'Signed in as '+esc(u.email):'Guest checkout'}</span></h2>
   <div class="cols"><form id="co" class="panel" novalidate>

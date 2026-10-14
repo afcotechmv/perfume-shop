@@ -42,7 +42,7 @@ function productForm(id){
   <div class="field"><label>Images <span id="imgcount" class="mono"></span></label>
   <div class="imgs" id="imgs"></div>
   <input type="file" id="imgfile" accept="image/*" multiple>
-  <div class="mono" style="margin-top:6px;text-transform:none;letter-spacing:0">The first image is the main one shown in the catalogue and banner; the product page lets customers browse all of them. Images are resized in the browser before saving. Landscape photos (3:2) fill the catalogue cards best.</div></div>
+  <div class="mono" style="margin-top:6px;text-transform:none;letter-spacing:0">The first image is the main one shown in the catalogue and banner; the product page lets customers browse all of them. Images are resized in the browser before saving. Portrait photos (4:5) fill the catalogue cards best.</div></div>
   <div class="field"><label>Description</label><textarea name="description" rows="3">${esc(p.description)}</textarea></div>
   <div class="field"><label>Fragrance details (one per line, “Label: value”, e.g. Top notes: bergamot)</label><textarea name="specs" rows="4">${esc((p.specs||[]).map(s=>s[0]+': '+s[1]).join('\n'))}</textarea></div>
   <div class="two"><div class="field"><label>Placeholder art hue (0–360)</label><input name="hue" type="number" min="0" max="360" value="${hue}"></div><label class="chk" style="align-self:end;margin-bottom:18px"><input type="checkbox" name="featured" ${p.featured?'checked':''}> Show in hero banner (several allowed)</label></div>

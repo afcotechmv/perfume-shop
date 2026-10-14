@@ -6,6 +6,29 @@ the tech edition (catalogue, product pages with image galleries, rotating hero
 banner, cart, guest or account checkout, admin products/orders/settings, demo
 and Supabase modes). Only the content and design have changed.
 
+DESIGN (version 1.1)
+The perfume store is deliberately laid out differently from the tech store:
+  - Header: logo centred, navigation on the left, account and bag on the right,
+    with a delivery announcement above it.
+  - Home page order: hero, "Who are you shopping for?" (three arched doorways
+    for Women's, Men's and Unisex), the maisons (brands), a sliding row of
+    signature fragrances, scent families, then delivery and payment notes.
+  - Hero: a dark stage tinted by each fragrance, an arched window for the
+    bottle, the fragrance notes on one side and the details on the other. The
+    arch image rises like a curtain when the slide changes. Choose a slide by
+    its name at the bottom, by swiping, or with the arrow keys; it also
+    changes by itself. The hero is always dark, in both light and dark themes.
+  - Collection page: filters on the left (For, Scent family, Maison), tall
+    arched product cards, search by name, brand or note (accents ignored).
+  - Product page: arched image gallery, notes shown as a pyramid (rows labelled
+    "Top notes", "Heart notes" and "Base notes" in the admin form), other
+    details listed beneath.
+  - The customer's cart is called the bag. Prices, checkout, orders, admin and
+    both modes work exactly as before.
+Portrait photos (4:5) suit the product images best.
+The text under "Who are you shopping for?" and the delivery and payment notes
+on the home page are placeholders you can edit in js/views-store.js.
+
 HOW PRODUCTS ARE ORGANISED
   Brand      Free text (e.g. Maison Veyra). Required. Filter list on the shop page.
   For        Women, Men or Unisex. Shown as three large tiles and as filter buttons.
@@ -80,7 +103,7 @@ it. The first image is the main one:
   arrows, the thumbnails, a swipe on a phone, or the keyboard arrow keys.
 A product with no images keeps its generated placeholder.
 
-Tip: square photos (1:1) fill the catalogue cards best. Photos of
+Tip: portrait photos (4:5) fill the catalogue cards best. Photos of
 other shapes are cropped to fit on the cards, but are shown whole on the
 product page.
 

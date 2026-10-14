@@ -14,11 +14,11 @@ const isAdmin=()=>S.user&&S.user.role==='admin';
 const saveCart=()=>{ls.set('au_cart',S.cart);updateChrome()};
 function cartLines(){return S.cart.map(c=>({p:getP(c.id),qty:c.qty})).filter(l=>l.p)}
 function addToCart(id,n=1){
-  const p=getP(id);if(!p||p.stock<=0)return toast('Out of stock');
+  const p=getP(id);if(!p||p.stock<=0)return toast('Sold out');
   const c=S.cart.find(x=>x.id===id),cur=c?c.qty:0,q=Math.min(p.stock,cur+n);
   if(c)c.qty=q;else S.cart.push({id,qty:q});
   saveCart();renderDrawer();
-  toast(q<cur+n?`Item added to cart (limited to ${p.stock} in stock)`:'Item added to cart');
+  toast(q<cur+n?`Added to your bag (limited to ${p.stock} in stock)`:'Added to your bag');
   const cc=$('#cc');cc.classList.remove('bump');void cc.offsetWidth;cc.classList.add('bump');
 }
 function setQty(id,q){

@@ -11,14 +11,14 @@ The perfume store is deliberately laid out differently from the tech store:
   - Header: logo centred, navigation on the left, account and bag on the right,
     with a delivery announcement above it.
   - Home page order: hero, "Who are you shopping for?" (three arched doorways
-    for Women's, Men's and Unisex), the maisons (brands), a sliding row of
-    signature fragrances, scent families, then delivery and payment notes.
+    for Women's, Men's and Unisex), a sliding row of signature fragrances,
+    "Browse by brands", then delivery and payment notes.
   - Hero: a dark stage tinted by each fragrance, an arched window for the
     bottle, the fragrance notes on one side and the details on the other. The
     arch image rises like a curtain when the slide changes. Choose a slide by
     its name at the bottom, by swiping, or with the arrow keys; it also
     changes by itself. The hero is always dark, in both light and dark themes.
-  - Collection page: filters on the left (For, Scent family, Maison), tall
+  - Collection page: filters on the left (For, Scent family, Brand), tall
     arched product cards, search by name, brand or note (accents ignored).
   - Product page: arched image gallery, notes shown as a pyramid (rows labelled
     "Top notes", "Heart notes" and "Base notes" in the admin form), other

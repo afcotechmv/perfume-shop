@@ -29,12 +29,12 @@ function facet(title,items,act,cur){return `<div class="facet"><h3>${title}</h3>
 function facetsHtml(){const f=S.filter,all=S.products.length;
   return facet('For',[['All','Everyone',all],...AUDS.map(a=>[a,aLabel(a),countBy(p=>p.audience===a)])],'aud',f.aud)
    +facet('Scent family',[['All','All families',all],...cats().slice(1).map(c=>[c,c,countBy(p=>p.category===c)])],'cat',f.cat)
-   +facet('Maison',[['All','All maisons',all],...brands().map(b=>[b,b,countBy(p=>p.brand===b)])],'brand',f.brand)}
+   +facet('Brand',[['All','All brands',all],...brands().map(b=>[b,b,countBy(p=>p.brand===b)])],'brand',f.brand)}
 const isFiltered=()=>{const f=S.filter;return f.cat!=='All'||f.aud!=='All'||f.brand!=='All'||f.q||f.inStock};
 const activeHtml=()=>isFiltered()?'<button class="link" data-act="clear">Clear all filters</button>':'';
 function catalogue(){
   const f=S.filter;
-  return `<div class="shop"><aside class="side" id="side"><div class="sq"><input type="search" id="q" placeholder="Name, note or maison" value="${esc(f.q)}" data-in="q" aria-label="Search the collection"></div>
+  return `<div class="shop"><aside class="side" id="side"><div class="sq"><input type="search" id="q" placeholder="Name, note or brand" value="${esc(f.q)}" data-in="q" aria-label="Search the collection"></div>
   <div id="facets">${facetsHtml()}</div>
   <label class="chk"><input type="checkbox" data-in="stock" ${f.inStock?'checked':''}> Only what is in stock</label></aside>
   <section class="results"><div class="rhead"><h1 class="rt">The collection</h1><span class="mono" id="count">${plural(filtered().length,'fragrance')}</span><span class="sp"></span>
@@ -69,14 +69,12 @@ function viewHome(){
 
   const rep=a=>S.products.find(p=>p.audience===a&&p.stock>0)||S.products.find(p=>p.audience===a);
   const portals=AUDS.map(a=>{const p=rep(a);return p?`<button class="portal" data-act="aud" data-v="${a}" data-go="1"><span class="parch">${pic(p)}</span><span class="plabel"><b>${aLabel(a)}</b><span>${plural(countBy(x=>x.audience===a),'fragrance')}</span></span></button>`:''}).join('');
-  const houses=brands().map(b=>`<button class="house" data-act="brand" data-v="${esc(b)}" data-go="1">${esc(b)}</button>`).join('');
   const rail=[...S.products].sort((x,y)=>(!!y.featured)-(!!x.featured)).slice(0,8).map(card).join('');
-  const fams=cats().slice(1).map(c=>`<button class="fam" data-act="cat" data-v="${esc(c)}" data-go="1"><span>${esc(c)}</span><i>${countBy(p=>p.category===c)}</i></button>`).join('');
+  const bl=brands().map(b=>`<button class="fam" data-act="brand" data-v="${esc(b)}" data-go="1"><span>${esc(b)}</span><i>${plural(countBy(p=>p.brand===b),'fragrance')}</i></button>`).join('');
   return hero+`
   <section class="sect"><div class="sech"><h2>Who are you shopping for?</h2></div><div class="portals">${portals}</div></section>
-  <section class="bleed"><div class="wrap"><div class="sech mid"><h2>The maisons</h2></div><div class="houses">${houses}</div></div></section>
   <section class="sect"><div class="sech"><h2>Signature fragrances</h2><a class="more" href="#/shop">See the whole collection</a></div><div class="rail">${rail}</div></section>
-  <section class="sect"><div class="sech"><h2>Browse by scent family</h2></div><div class="fams">${fams}</div></section>
+  <section class="sect"><div class="sech"><h2>Browse by brands</h2></div><div class="fams">${bl}</div></section>
   <section class="bleed"><div class="wrap"><div class="promise">
    <div><h3>Delivery in Malé</h3><p>Free on orders above MVR ${CFG.delivery.maleFreeAbove}. Below that, MVR ${CFG.delivery.maleFee}.</p></div>
    <div><h3>Delivery to the islands</h3><p>We arrange it with you and hand your order to the island supply boat.</p></div>

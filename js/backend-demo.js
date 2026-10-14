@@ -4,7 +4,7 @@
    Nothing is sent anywhere, and nothing is shared between visitors. It follows the same rules as
    sql/schema.sql (pricing, stock, delivery fee, cancellation restores stock) so the behaviour is representative. */
 const demoBackend=(()=>{
-  const KEY={p:'au_demo_products',o:'au_demo_orders',s:'au_demo_settings',u:'au_demo_users',me:'au_demo_me',n:'au_demo_seq'};
+  const KEY={p:'au_demo_products',o:'au_demo_orders',s:'au_demo_settings',t:'au_demo_terms',u:'au_demo_users',me:'au_demo_me',n:'au_demo_seq'};
   const DEMO_ADMIN={email:'admin@demo.mv',password:'demo1234'};
   const mem={};
   const get=(k,d)=>{try{const v=localStorage.getItem(k);if(v!==null)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d};
@@ -27,23 +27,44 @@ const demoBackend=(()=>{
     P("PF-GS-001","Travel Spray Trio","Atelier Solenne","Unisex","Gift Sets",450,30,"Three pocket-size sprays in a gift box. Placeholder product content.",[["Concentration","Eau de Parfum"],["Size","3 x 10 ml"],["Contents","Rose Éclat, Jasmin Soleil, Agrumes Blancs"]],false,290)
   ];
   const products=()=>{let p=get(KEY.p,null);if(!p){p=clone(SEED);set(KEY.p,p)}return p};
-  const settings=()=>({delivery_male_free_above:500,delivery_male_fee:50,tax_rate:0,...get(KEY.s,{})});
+  const settings=()=>({delivery_male_free_above:500,delivery_male_fee:50,tax_rate:0,show_scents:0,...get(KEY.s,{})});
+  /* the lists administrators manage: categories (Women, Men, Unisex ...) and scents (Floral, Woody ...) */
+  const terms=()=>{let t=get(KEY.t,null);if(!t){t={audience:['Women','Men','Unisex'],scent:[...new Set(SEED.map(p=>p.category).filter(Boolean))]};set(KEY.t,t)}return t};
+  const termField=kind=>kind==='audience'?'audience':'category';
+  const termCheck=(t,kind,name,old)=>{
+    if(!t[kind])throw new Error('Unknown list');
+    if(!name||name.length>60)throw new Error('Enter a name of 1 to 60 characters');
+    if(t[kind].some(x=>x!==old&&x.toLowerCase()===name.toLowerCase()))throw new Error('That name already exists');
+  };
   const me=()=>get(KEY.me,null);
   const needAdmin=()=>{const u=me();if(!u||u.role!=='admin')throw new Error('Not permitted: administrator sign-in required')};
   const STATUSES=['Pending','Confirmed','Shipped','Delivered','Cancelled'];
-  const AUD=['Men','Women','Unisex'];
   const emailRx=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
   const db={
     async settings(){return settings()},
     async saveSettings(o){needAdmin();set(KEY.s,{...settings(),...o})},
+    async listTerms(){return clone(terms())},
+    async addTerm(kind,name){needAdmin();const t=terms(),n=String(name||'').trim();termCheck(t,kind,n);t[kind].push(n);set(KEY.t,t)},
+    async renameTerm(kind,old,name){
+      needAdmin();const t=terms(),n=String(name||'').trim();termCheck(t,kind,n,old);
+      const i=t[kind].indexOf(old);if(i<0)throw new Error('That entry no longer exists');
+      t[kind][i]=n;set(KEY.t,t);const f=termField(kind);
+      set(KEY.p,products().map(p=>p[f]===old?{...p,[f]:n}:p));   // products that used the old name follow the rename
+    },
+    async deleteTerm(kind,name){
+      needAdmin();const t=terms(),f=termField(kind),n=products().filter(p=>p[f]===name).length;
+      if(n)throw new Error(n+' product(s) still use "'+name+'". Change those products first.');
+      if(kind==='audience'&&t.audience.length<=1)throw new Error('Keep at least one category');
+      t[kind]=t[kind].filter(x=>x!==name);set(KEY.t,t);
+    },
     async listProducts(){return clone(products())},
     async saveProduct(p){
       needAdmin();
       if(!(p.price>=0)||!Number.isInteger(p.stock)||p.stock<0)throw new Error('Invalid price or stock');
       const all=products(),sku=(p.sku||'').trim();
       if(sku&&all.some(x=>x.sku===sku&&x.id!==p.id))throw new Error('That value must be unique (is the SKU already used?)');
-      const row={sku,name:p.name,brand:String(p.brand||'').trim(),audience:AUD.includes(p.audience)?p.audience:'Unisex',category:p.category,price:p.price,stock:p.stock,description:p.description||'',specs:p.specs||[],featured:!!p.featured,hue:p.hue,images:Array.isArray(p.images)?p.images.filter(Boolean):[]};
+      const row={sku,name:p.name,brand:String(p.brand||'').trim(),audience:String(p.audience||'').trim()||terms().audience[0]||'Unisex',category:String(p.category||'').trim(),price:p.price,stock:p.stock,description:p.description||'',specs:p.specs||[],featured:!!p.featured,hue:p.hue,images:Array.isArray(p.images)?p.images.filter(Boolean):[]};
       if(p.id){const i=all.findIndex(x=>x.id===p.id);if(i<0)throw new Error('Not permitted, or the record no longer exists');all[i]={...all[i],...row};set(KEY.p,all);return p.id}
       const id='d-'+Date.now().toString(36);all.push({id,...row});set(KEY.p,all);return id;
     },
@@ -134,7 +155,7 @@ const demoBackend=(()=>{
     onChange(){}
   };
 
-  return{name:'demo',db,auth,async init(){products();return{}},
+  return{name:'demo',db,auth,async init(){products();terms();return{}},
     reset(){
       Object.values(KEY).forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
       ['au_cart'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});

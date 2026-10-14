@@ -3,13 +3,20 @@
 /* ============ STATE ============ */
 const S={
   products:[],cart:ls.get('au_cart',[]),user:null,lastOrder:lastOrderGet(),
+  terms:{audience:['Women','Men','Unisex'],scent:[]},   // the lists administrators manage (Admin > Categories and scents)
   filter:{cat:'All',aud:'All',brand:'All',q:'',sort:'featured',inStock:false},
   area:'male',adminTab:'products',acctTab:'in',pdQty:1,confirmDel:null
 };
 const getP=id=>S.products.find(p=>p.id===id);
-const cats=()=>['All',...new Set(S.products.map(p=>p.category))];
+/* Terminology: product.audience is the CATEGORY customers shop by (Women, Men, Unisex ...);
+   product.category holds the SCENT (Floral, Woody ...). Scent information is shown only when CFG.showScents is on. */
+const showScents=()=>!!CFG.showScents;
+const usedBy=(field,list)=>{const used=new Set(S.products.map(p=>p[field]).filter(Boolean));return[...list.filter(n=>used.has(n)),...[...used].filter(n=>!list.includes(n))]};
+const audShown=()=>usedBy('audience',S.terms.audience);      // categories that have at least one product
+const scentsShown=()=>usedBy('category',S.terms.scent);       // scents that have at least one product
+const cats=()=>['All',...scentsShown()];
+const termsFromProducts=()=>({audience:[...new Set(S.products.map(p=>p.audience).filter(Boolean))],scent:[...new Set(S.products.map(p=>p.category).filter(Boolean))]});
 const brands=()=>[...new Set(S.products.map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-const AUDS=['Women','Men','Unisex'];
 const isAdmin=()=>S.user&&S.user.role==='admin';
 const saveCart=()=>{ls.set('au_cart',S.cart);updateChrome()};
 function cartLines(){return S.cart.map(c=>({p:getP(c.id),qty:c.qty})).filter(l=>l.p)}

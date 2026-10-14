@@ -2,15 +2,15 @@
 /* AURELLE — storefront views: home, collection, product, bag, checkout, order confirmation. */
 /* ============ VIEWS ============ */
 const stBadge=p=>p.stock<=0?'<span class="st bad">Sold out</span>':p.stock<=CFG.lowStock?`<span class="st warn">Only ${p.stock} left</span>`:'<span class="st ok">In stock</span>';
-const aLabel=a=>({Men:"Men's",Women:"Women's",Unisex:'Unisex'}[a]||a||'');
 const plural=(n,w)=>n+' '+w+(n===1?'':'s');
 /* accent-insensitive search: "vetiver" finds Vétiver */
 const fold=t=>String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const countBy=fn=>S.products.filter(fn).length;
 /* Fragrance notes (rows labelled Top / Heart / Base) are shown as a pyramid; every other detail row is a plain fact. */
 const noteRx=/^(top|heart|base)\b/i;
-const splitSpecs=p=>{const s=Array.isArray(p.specs)?p.specs:[];return{notes:s.filter(r=>noteRx.test(r[0])),rest:s.filter(r=>!noteRx.test(r[0]))}};
-const kindOf=p=>[aLabel(p.audience),p.category].filter(Boolean).join(', ');
+const splitSpecs=p=>{const s=Array.isArray(p.specs)?p.specs:[];return{notes:showScents()?s.filter(r=>noteRx.test(r[0])):[],rest:s.filter(r=>!noteRx.test(r[0]))}};   // notes stay hidden unless scent information is on
+const shownSpecs=p=>{const sp=splitSpecs(p);return[...sp.notes,...sp.rest]};
+const kindOf=p=>[p.audience,showScents()?p.category:''].filter(Boolean).join(', ');
 const stockFlag=p=>p.stock<=0?'Sold out':p.stock<=CFG.lowStock?`Only ${p.stock} left`:'';
 
 function card(p){const f=stockFlag(p);return `<article class="card ${p.stock<=0?'gone':''}"><a class="thumb" href="#/product/${p.id}">${pic(p)}${f?`<span class="flag">${f}</span>`:''}</a><div class="cbody">
@@ -18,7 +18,7 @@ function card(p){const f=stockFlag(p);return `<article class="card ${p.stock<=0?
   <span class="kind">${esc(kindOf(p))}</span><span class="price">${fmt(p.price)}</span>
   <button class="add" data-act="add" data-id="${p.id}" ${p.stock<=0?'disabled':''}>${p.stock<=0?'Sold out':'Add to bag'}</button></div></article>`}
 function filtered(){
-  const f=S.filter;let a=S.products.filter(p=>(f.cat==='All'||p.category===f.cat)&&(f.aud==='All'||p.audience===f.aud)&&(f.brand==='All'||p.brand===f.brand)&&(!f.inStock||p.stock>0)&&(!f.q||fold(p.name+' '+p.brand+' '+aLabel(p.audience)+' '+p.category+' '+p.description+' '+(p.specs||[]).map(s=>s[1]).join(' ')).includes(fold(f.q))));
+  const f=S.filter;let a=S.products.filter(p=>(!showScents()||f.cat==='All'||p.category===f.cat)&&(f.aud==='All'||p.audience===f.aud)&&(f.brand==='All'||p.brand===f.brand)&&(!f.inStock||p.stock>0)&&(!f.q||fold(p.name+' '+p.brand+' '+p.audience+' '+(showScents()?p.category:'')+' '+p.description+' '+shownSpecs(p).map(s=>s[1]).join(' ')).includes(fold(f.q))));
   const s={price_asc:(x,y)=>x.price-y.price,price_desc:(x,y)=>y.price-x.price,name:(x,y)=>x.name.localeCompare(y.name),featured:(x,y)=>(!!y.featured)-(!!x.featured)}[f.sort];
   return a.sort(s);
 }
@@ -27,10 +27,10 @@ function gridHtml(){const a=filtered();return a.length?a.map(card).join(''):'<di
 /* Collection page: filter sidebar on the left, tall product cards on the right. */
 function facet(title,items,act,cur){return `<div class="facet"><h3>${title}</h3><ul>${items.map(([v,l,n])=>`<li><button class="fi ${cur===v?'on':''}" data-act="${act}" data-v="${esc(v)}"><span>${esc(l)}</span><i>${n}</i></button></li>`).join('')}</ul></div>`}
 function facetsHtml(){const f=S.filter,all=S.products.length;
-  return facet('For',[['All','Everyone',all],...AUDS.map(a=>[a,aLabel(a),countBy(p=>p.audience===a)])],'aud',f.aud)
-   +facet('Scent family',[['All','All families',all],...cats().slice(1).map(c=>[c,c,countBy(p=>p.category===c)])],'cat',f.cat)
+  return facet('Category',[['All','All categories',all],...audShown().map(a=>[a,a,countBy(p=>p.audience===a)])],'aud',f.aud)
+   +(showScents()?facet('Scent',[['All','All scents',all],...cats().slice(1).map(c=>[c,c,countBy(p=>p.category===c)])],'cat',f.cat):'')
    +facet('Brand',[['All','All brands',all],...brands().map(b=>[b,b,countBy(p=>p.brand===b)])],'brand',f.brand)}
-const isFiltered=()=>{const f=S.filter;return f.cat!=='All'||f.aud!=='All'||f.brand!=='All'||f.q||f.inStock};
+const isFiltered=()=>{const f=S.filter;return (showScents()&&f.cat!=='All')||f.aud!=='All'||f.brand!=='All'||f.q||f.inStock};
 const activeHtml=()=>isFiltered()?'<button class="link" data-act="clear">Clear all filters</button>':'';
 function catalogue(){
   const f=S.filter;
@@ -68,13 +68,14 @@ function viewHome(){
   const hero=n?`<section class="hero" id="hero" role="region" aria-roledescription="carousel" aria-label="Featured fragrances">${sparks()}<div class="slides">${hs.map((h,i)=>heroSlide(h,i,n)).join('')}</div>${ui}</section>`:'';
 
   const rep=a=>S.products.find(p=>p.audience===a&&p.stock>0)||S.products.find(p=>p.audience===a);
-  const portals=AUDS.map(a=>{const p=rep(a);return p?`<button class="portal" data-act="aud" data-v="${a}" data-go="1"><span class="parch">${pic(p)}</span><span class="plabel"><b>${aLabel(a)}</b><span>${plural(countBy(x=>x.audience===a),'fragrance')}</span></span></button>`:''}).join('');
+  const portals=audShown().map(a=>{const p=rep(a);return p?`<button class="portal" data-act="aud" data-v="${a}" data-go="1"><span class="parch">${pic(p)}</span><span class="plabel"><b>${esc(a)}</b><span>${plural(countBy(x=>x.audience===a),'fragrance')}</span></span></button>`:''}).join('');
   const rail=[...S.products].sort((x,y)=>(!!y.featured)-(!!x.featured)).slice(0,8).map(card).join('');
+  const sc=showScents()&&cats().length>1?`<section class="sect"><div class="sech"><h2>Browse by scent</h2></div><div class="fams">${cats().slice(1).map(c=>`<button class="fam" data-act="cat" data-v="${esc(c)}" data-go="1"><span>${esc(c)}</span><i>${plural(countBy(p=>p.category===c),'fragrance')}</i></button>`).join('')}</div></section>`:'';
   const bl=brands().map(b=>`<button class="fam" data-act="brand" data-v="${esc(b)}" data-go="1"><span>${esc(b)}</span><i>${plural(countBy(p=>p.brand===b),'fragrance')}</i></button>`).join('');
   return hero+`
   <section class="sect"><div class="sech"><h2>Who are you shopping for?</h2></div><div class="portals">${portals}</div></section>
   <section class="sect"><div class="sech"><h2>Signature fragrances</h2><a class="more" href="#/shop">See the whole collection</a></div><div class="rail">${rail}</div></section>
-  <section class="sect"><div class="sech"><h2>Browse by brands</h2></div><div class="fams">${bl}</div></section>
+  <section class="sect"><div class="sech"><h2>Browse by brands</h2></div><div class="fams">${bl}</div></section>${sc}
   <section class="bleed"><div class="wrap"><div class="promise">
    <div><h3>Delivery in Malé</h3><p>Free on orders above MVR ${CFG.delivery.maleFreeAbove}. Below that, MVR ${CFG.delivery.maleFee}.</p></div>
    <div><h3>Delivery to the islands</h3><p>We arrange it with you and hand your order to the island supply boat.</p></div>
@@ -96,9 +97,9 @@ function gallery(p){
 function viewProduct(id){
   const p=getP(id);if(!p)return '<div class="empty" style="margin-top:30px">Product not found. <a href="#/shop" style="color:var(--accent)">Back to the collection</a></div>';
   const q=Math.min(S.pdQty,Math.max(1,p.stock));S.pdQty=q;
-  const rel=S.products.filter(x=>x.id!==p.id&&((p.brand&&x.brand===p.brand)||x.category===p.category)).sort((a,b)=>(b.brand===p.brand)-(a.brand===p.brand)).slice(0,4);
+  const rel=S.products.filter(x=>x.id!==p.id&&((p.brand&&x.brand===p.brand)||(showScents()&&p.category&&x.category===p.category)||x.audience===p.audience)).sort((a,b)=>(b.brand===p.brand)-(a.brand===p.brand)).slice(0,4);
   const sp=splitSpecs(p);
-  return `<div class="crumb"><a href="#/">Home</a> / <a href="#/shop">Collection</a> / ${esc(p.category)}</div>
+  return `<div class="crumb"><a href="#/">Home</a> / <a href="#/shop">Collection</a> / ${esc(p.audience||'')}</div>
   <div class="pgrid">${gallery(p)}<div class="pinfo">
   <span class="by">${esc(p.brand||p.category)}</span><h1>${esc(p.name)}</h1>
   <div class="kind">${esc(kindOf(p))}</div>

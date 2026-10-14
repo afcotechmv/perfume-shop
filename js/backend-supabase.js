@@ -17,10 +17,23 @@ const supabaseBackend=(()=>{
 
   const db={
     async settings(){const rows=must(await sb.from('settings').select('key,value'));return Object.fromEntries(rows.map(r=>[r.key,Number(r.value)]))},
-    async saveSettings(o){for(const [key,value] of Object.entries(o))changed(must(await sb.from('settings').update({value}).eq('key',key).select('key')))},
+    async saveSettings(o){for(const [key,value] of Object.entries(o))changed(must(await sb.from('settings').update({value}).eq('key',key).select('key')),'A setting is missing in the database. Run the latest sql/schema.sql in Supabase, then try again.')},
+    /* categories (audience) and scents: the lists administrators manage; renaming and deleting go through database functions */
+    async listTerms(){
+      const rows=must(await sb.from('terms').select('kind,name,sort').order('sort').order('name')),o={audience:[],scent:[]};
+      rows.forEach(r=>{if(o[r.kind])o[r.kind].push(r.name)});return o;
+    },
+    async addTerm(kind,name){
+      const n=String(name||'').trim();if(!n||n.length>60)throw new Error('Enter a name of 1 to 60 characters');
+      const {data:last}=await sb.from('terms').select('sort').eq('kind',kind).order('sort',{ascending:false}).limit(1);
+      const {error}=await sb.from('terms').insert({kind,name:n,sort:((last&&last[0]&&last[0].sort)||0)+1});
+      if(error)throw new Error(error.code==='23505'?'That name already exists':error.message);
+    },
+    async renameTerm(kind,old,name){const {error}=await sb.rpc('rename_term',{p_kind:kind,p_old:old,p_new:name});if(error)throw new Error(error.message)},
+    async deleteTerm(kind,name){const {error}=await sb.rpc('delete_term',{p_kind:kind,p_name:name});if(error)throw new Error(error.message)},
     async listProducts(){return must(await sb.from('products').select('*').order('created_at')).map(rowToProduct)},
     async saveProduct(p){
-      const row={sku:p.sku||null,name:p.name,brand:p.brand||'',audience:p.audience||'Unisex',category:p.category,price:p.price,stock:p.stock,description:p.description,specs:p.specs,featured:!!p.featured,hue:p.hue,images:Array.isArray(p.images)?p.images.filter(Boolean):[]};
+      const row={sku:p.sku||null,name:p.name,brand:p.brand||'',audience:p.audience||'Unisex',category:p.category||'',price:p.price,stock:p.stock,description:p.description,specs:p.specs,featured:!!p.featured,hue:p.hue,images:Array.isArray(p.images)?p.images.filter(Boolean):[]};
       if(p.id){changed(must(await sb.from('products').update(row).eq('id',p.id).select('id')));return p.id}
       return must(await sb.from('products').insert(row).select('id').single()).id;
     },

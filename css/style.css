@@ -352,3 +352,14 @@ footer a:hover,footer li button:hover{color:var(--text)}
   .sparks{display:none}
   .gs,.gs.active,.thumb svg,.thumb img,.parch>*{transition:none;transform:none}
 }
+
+/* admin: categories and scents lists */
+.termcols{align-items:start}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;margin-bottom:8px}
+.trow.add{grid-template-columns:minmax(0,1fr) auto;margin-top:16px}
+.trow input:not([type=hidden]){background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;outline:none;width:100%}
+.trow .mono{white-space:nowrap}
+.btn.sm:disabled{opacity:.35}
+@media(max-width:900px){.termcols{grid-template-columns:1fr}.trow{grid-template-columns:minmax(0,1fr) auto auto}.trow .mono{display:none}}
+.field label.chk{display:flex;align-items:center;gap:10px;margin-bottom:0;font-size:.95rem;color:var(--text)}
+.field input[type=checkbox],.chk input[type=checkbox]{width:auto;padding:0;flex:0 0 auto}

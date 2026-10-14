@@ -17,7 +17,8 @@ create table if not exists public.settings (
 insert into public.settings (key, value, description) values
   ('delivery_male_free_above', 500, 'Male'': delivery is free when the subtotal exceeds this amount (MVR)'),
   ('delivery_male_fee',        50,  'Male'': delivery fee (MVR) when the subtotal does not exceed the free threshold'),
-  ('tax_rate',                 0,   'Tax rate as a fraction, e.g. 0.08 for 8%. Confirm the applicable GST rate before changing')
+  ('tax_rate',                 0,   'Tax rate as a fraction, e.g. 0.08 for 8%. Confirm the applicable GST rate before changing'),
+  ('show_scents',              0,   'Show scent information on the store (scent and fragrance notes): 1 = yes, 0 = no')
 on conflict (key) do nothing;
 
 -- ---------- profiles (one row per auth user) ----------
@@ -59,8 +60,8 @@ create table if not exists public.products (
   sku         text unique,
   name        text not null check (length(btrim(name)) between 1 and 200),
   brand       text not null default '' check (length(brand) <= 80),
-  audience    text not null default 'Unisex' check (audience in ('Men', 'Women', 'Unisex')),
-  category    text not null check (length(btrim(category)) between 1 and 80),   -- scent family or collection, e.g. Floral, Woody, Gift Sets
+  audience    text not null default 'Unisex',   -- the category shown to customers: one of the names in public.terms (kind = 'audience')
+  category    text not null default '',          -- the scent, e.g. Floral, Woody: one of the names in public.terms (kind = 'scent'); may be empty
   price       numeric(12,2) not null check (price >= 0),
   stock       integer not null default 0 check (stock >= 0),
   description text not null default '',
@@ -69,13 +70,74 @@ create table if not exists public.products (
   featured    boolean not null default false,        -- hero banner product
   hue         integer not null default 200 check (hue between 0 and 360),  -- placeholder art colour
   created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  updated_at  timestamptz not null default now(),
+  constraint products_audience_len check (length(btrim(audience)) between 1 and 80),
+  constraint products_category_len check (length(category) <= 80)
 );
 
 -- for projects created before product images were added:
 alter table public.products add column if not exists images jsonb not null default '[]'::jsonb;
 alter table public.products add column if not exists brand text not null default '' check (length(brand) <= 80);
-alter table public.products add column if not exists audience text not null default 'Unisex' check (audience in ('Men', 'Women', 'Unisex'));
+alter table public.products add column if not exists audience text not null default 'Unisex';
+-- for projects created with the earlier fixed list of audiences and a required scent:
+alter table public.products drop constraint if exists products_audience_check;
+alter table public.products drop constraint if exists products_category_check;
+alter table public.products alter column category set default '';
+alter table public.products drop constraint if exists products_audience_len;
+alter table public.products add  constraint products_audience_len check (length(btrim(audience)) between 1 and 80);
+alter table public.products drop constraint if exists products_category_len;
+alter table public.products add  constraint products_category_len check (length(category) <= 80);
+
+-- ---------- categories and scents (the lists administrators manage) ----------
+-- kind 'audience' = the category customers shop by (Women, Men, Unisex ...); kind 'scent' = the scent (Floral, Woody ...).
+create table if not exists public.terms (
+  id         uuid primary key default gen_random_uuid(),
+  kind       text not null check (kind in ('audience', 'scent')),
+  name       text not null check (length(btrim(name)) between 1 and 60),
+  sort       integer not null default 0,
+  created_at timestamptz not null default now()
+);
+create unique index if not exists terms_kind_name_key on public.terms (kind, lower(btrim(name)));
+-- starting lists (only when the table is empty, so names an administrator deleted do not come back)
+insert into public.terms (kind, name, sort)
+select * from (values
+  ('audience', 'Women', 1), ('audience', 'Men', 2), ('audience', 'Unisex', 3),
+  ('scent', 'Oriental & Spicy', 1), ('scent', 'Floral', 2), ('scent', 'Woody', 3), ('scent', 'Fresh & Citrus', 4),
+  ('scent', 'Oud & Attar', 5), ('scent', 'Gourmand', 6), ('scent', 'Gift Sets', 7)
+) as v (kind, name, sort)
+where not exists (select 1 from public.terms);
+
+-- Renaming also updates every product that uses the name; deleting is refused while a product still uses it.
+create or replace function public.rename_term(p_kind text, p_old text, p_new text)
+returns void language plpgsql security definer set search_path = public as $$
+declare v_new text := btrim(p_new);
+begin
+  if not public.is_admin() then raise exception 'Not permitted'; end if;
+  if v_new = '' or length(v_new) > 60 then raise exception 'Enter a name of 1 to 60 characters'; end if;
+  if exists (select 1 from public.terms where kind = p_kind and lower(btrim(name)) = lower(v_new) and name <> p_old) then
+    raise exception 'That name already exists';
+  end if;
+  update public.terms set name = v_new where kind = p_kind and name = p_old;
+  if not found then raise exception 'That entry no longer exists'; end if;
+  if p_kind = 'audience' then update public.products set audience = v_new where audience = p_old;
+  else update public.products set category = v_new where category = p_old; end if;
+end $$;
+
+create or replace function public.delete_term(p_kind text, p_name text)
+returns void language plpgsql security definer set search_path = public as $$
+declare v_n integer;
+begin
+  if not public.is_admin() then raise exception 'Not permitted'; end if;
+  if p_kind = 'audience' then select count(*) into v_n from public.products where audience = p_name;
+  else select count(*) into v_n from public.products where category = p_name; end if;
+  if v_n > 0 then raise exception '% product(s) still use "%". Change those products first.', v_n, p_name; end if;
+  if p_kind = 'audience' and (select count(*) from public.terms where kind = 'audience') <= 1 then
+    raise exception 'Keep at least one category';
+  end if;
+  delete from public.terms where kind = p_kind and name = p_name;
+end $$;
+revoke all on function public.rename_term(text, text, text), public.delete_term(text, text) from public;
+grant execute on function public.rename_term(text, text, text), public.delete_term(text, text) to authenticated;
 
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
@@ -236,6 +298,7 @@ grant execute on function public.place_order(jsonb, jsonb, text, text) to anon, 
 alter table public.settings    enable row level security;
 alter table public.profiles    enable row level security;
 alter table public.products    enable row level security;
+alter table public.terms       enable row level security;
 alter table public.orders      enable row level security;
 alter table public.order_items enable row level security;
 
@@ -248,6 +311,11 @@ drop policy if exists products_read  on public.products;
 drop policy if exists products_admin on public.products;
 create policy products_read  on public.products for select to anon, authenticated using (true);
 create policy products_admin on public.products for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists terms_read  on public.terms;
+drop policy if exists terms_admin on public.terms;
+create policy terms_read  on public.terms for select to anon, authenticated using (true);
+create policy terms_admin on public.terms for insert to authenticated with check (public.is_admin());
 
 drop policy if exists profiles_read_own  on public.profiles;
 drop policy if exists profiles_update_own on public.profiles;
@@ -273,6 +341,9 @@ grant update (status) on public.orders to authenticated;                        
 revoke all on public.products from anon, authenticated;
 grant select on public.products to anon, authenticated;
 grant insert, update, delete on public.products to authenticated;                                       -- admins only, via policy
+revoke all on public.terms from anon, authenticated;
+grant select on public.terms to anon, authenticated;
+grant insert on public.terms to authenticated;                                                          -- admins only, via policy; rename and delete go through functions
 
 -- ---------- product image storage ----------
 -- A public bucket: anyone can view the images (they appear in the catalogue); only administrators can upload or remove them.

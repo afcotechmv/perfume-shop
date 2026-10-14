@@ -18,11 +18,11 @@ The perfume store is deliberately laid out differently from the tech store:
     arch image rises like a curtain when the slide changes. Choose a slide by
     its name at the bottom, by swiping, or with the arrow keys; it also
     changes by itself. The hero is always dark, in both light and dark themes.
-  - Collection page: filters on the left (For, Scent family, Brand), tall
+  - Collection page: filters on the left (Category, Brand, and Scent when it is turned on), tall
     arched product cards, search by name, brand or note (accents ignored).
-  - Product page: arched image gallery, notes shown as a pyramid (rows labelled
-    "Top notes", "Heart notes" and "Base notes" in the admin form), other
-    details listed beneath.
+  - Product page: arched image gallery, other details listed beneath, and the
+    notes shown as a pyramid when scent information is turned on (rows labelled
+    "Top notes", "Heart notes" and "Base notes" in the admin form).
   - The customer's cart is called the bag. Prices, checkout, orders, admin and
     both modes work exactly as before.
 Portrait photos (4:5) suit the product images best.
@@ -31,12 +31,34 @@ on the home page are placeholders you can edit in js/views-store.js.
 
 HOW PRODUCTS ARE ORGANISED
   Brand      Free text (e.g. Maison Veyra). Required. Filter list on the shop page.
-  For        Women, Men or Unisex. Shown as three large tiles and as filter buttons.
-  Category   Free text: a scent family or collection (Floral, Woody, Oud & Attar,
-             Gift Sets and so on). New categories appear automatically once a
-             product uses them.
+  Category   Who the product is for: Women, Men, Unisex. Customers shop by it
+             (navigation, doorways on the home page, filter on the shop page).
+  Scent      Optional: Woody, Floral and so on. A product has one scent or none.
   Details    The admin form's "Fragrance details" box, one "Label: value" per
-             line (Top notes, Heart notes, Base notes, Size, Concentration...).
+             line (Size, Concentration, Longevity, and Top / Heart / Base notes).
+
+SCENT INFORMATION IS OFF BY DEFAULT
+  Out of the box the store shows no scent information at all: no scent on the
+  cards or product pages, no scent filter, no top, heart or base notes, and the
+  hero shows size and concentration instead. Nothing is deleted: the data stays
+  saved. To show it, sign in as admin, open Admin > Settings and tick "Show
+  scent information on the store", then Save settings. Ticking it adds the
+  scent to cards and product pages, a scent filter, the notes pyramid on the
+  product page, the notes in the hero, and a "Browse by scent" section on the
+  home page. Search also covers the notes while it is on.
+
+MANAGING CATEGORIES AND SCENTS (Admin > Categories and scents)
+  Both lists can be added to, renamed and deleted by the administrator.
+  - Add: type a name and press Add. Names must be unique (capitals ignored).
+  - Rename: change the name and press Save. Every product that used the old
+    name is updated too.
+  - Delete: press Delete, then Confirm delete. An entry cannot be deleted
+    while products still use it (the button is greyed out and shows how many
+    products use it): change those products first. At least one category must
+    remain.
+  Categories only appear in the store once at least one product uses them. The
+  product form lets the administrator pick from these lists.
+
 The 12 sample products and the brands are placeholders; delete or edit them in
 the admin panel. The "AURELLE" name is a placeholder too: change it in
 index.html (title and the brand link) and in the footer.
@@ -44,10 +66,12 @@ index.html (title and the brand link) and in the footer.
 The demo uses its own browser storage keys (au_...), so it does not clash with
 the tech edition if both are opened from the same web address.
 
-If you already ran an earlier schema.sql in a Supabase project, running this
-version again is safe: it adds the brand and audience columns if they are
-missing. (Existing products will have a blank brand and need one entered
-before they can be edited and saved.)
+If you already ran an earlier schema.sql in a Supabase project, run this
+version again: it is safe to repeat. It adds the brand column if missing,
+creates the categories and scents table with the starting lists, adds the
+"show scent information" setting (off) and relaxes the old fixed list of
+categories. Products you already have are kept. (Existing products will have a
+blank brand and need one entered before they can be edited and saved.)
 
 A static storefront (HTML, CSS and JavaScript). It has two modes, chosen in
 js/config.js:

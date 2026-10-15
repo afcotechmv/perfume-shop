@@ -6,7 +6,7 @@ the tech edition (catalogue, product pages with image galleries, rotating hero
 banner, cart, guest or account checkout, admin products/orders/settings, demo
 and Supabase modes). Only the content and design have changed.
 
-DESIGN (version 1.1)
+DESIGN
 The perfume store is deliberately laid out differently from the tech store:
   - Header: logo centred, navigation on the left, account and bag on the right,
     with a delivery announcement above it.
@@ -28,6 +28,14 @@ The perfume store is deliberately laid out differently from the tech store:
 Portrait photos (4:5) suit the product images best.
 The text under "Who are you shopping for?" and the delivery and payment notes
 on the home page are placeholders you can edit in js/views-store.js.
+
+FONTS
+  The fonts are bundled in css/fonts (Marcellus for headings and prices, Jost for
+  body text), so the store does not need a font service and looks the same
+  offline. Both are open-licence fonts; their licence files are in the same
+  folder. To use a different heading font, add its file to css/fonts, add an
+  @font-face line at the top of css/style.css, and change the --display value
+  just below it.
 
 HOW PRODUCTS ARE ORGANISED
   Brand      Free text (e.g. Maison Veyra). Required. Filter list on the shop page.

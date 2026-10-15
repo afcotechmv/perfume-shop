@@ -13,7 +13,7 @@ function art(p){
   const h=Number.isFinite(+p.hue)?+p.hue:30,id='a'+(++artN),kind=bottleKind(p);
   const brand=esc(trunc(String(p.brand||'').toUpperCase(),16));
   const label=(x,y,w,hh)=>`<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="3" fill="hsl(${h} 30% 7% / .55)" stroke="url(#${id}g)" stroke-width="1.2"/>`
-    +(brand?`<text x="${x+w/2}" y="${y+hh/2-1}" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="9" letter-spacing="2.2" fill="#ecd49b">${brand}</text><path d="M${x+w/2-14} ${y+hh/2+9}h28" stroke="#ecd49b" stroke-opacity=".55"/>`:'');
+    +(brand?`<text x="${x+w/2}" y="${y+hh/2-1}" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="9" letter-spacing="2.2" fill="#ecd49b">${brand}</text><path d="M${x+w/2-14} ${y+hh/2+9}h28" stroke="#ecd49b" stroke-opacity=".55"/>`:'');
   const gold=`fill="url(#${id}g)"`;
   /* body uses "@" as a placeholder for its paint attributes; clip is the inner shape the liquid is cut to */
   const K=[
@@ -51,5 +51,5 @@ function art(p){
   <g clip-path="url(#${id}c)"><rect x="90" y="${K.liq}" width="220" height="260" fill="url(#${id}q)" opacity=".92"/><rect x="90" y="${K.liq}" width="220" height="3" fill="#fff" opacity=".35"/></g>
   ${K.body.replace('@','fill="none" stroke="hsl('+h+' 45% 82% / .55)" stroke-width="1.6"')}
   ${K.cap}${K.lab}${K.hl}
-  <text x="200" y="378" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="15" fill="hsl(${h} 45% 80%)" opacity=".8">${esc(trunc(p.name,26))}</text></svg>`;
+  <text x="200" y="378" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="16" fill="hsl(${h} 45% 80%)" opacity=".8">${esc(trunc(p.name,26))}</text></svg>`;
 }

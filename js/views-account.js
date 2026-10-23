@@ -2,7 +2,7 @@
 function demoHint(){
   return CFG.mode!=='demo'?'':`<div class="demohint"><b>Demo accounts.</b> Administrator: <b>admin@demo.mv</b> / <b>demo1234</b>. Customer: choose Create account and enter a name, a phone number, any email address and a password of at least 6 characters. Passwords are not stored or checked in the demo, so please do not enter a real one.</div>`;
 }
-/* AURELLE — account view (sign in, registration, order history). */
+/* Liladip — account view (sign in, registration, order history). */
 async function viewAccount(){
   if(S.user){
     const os=(await db.listOrders()).filter(o=>o.userId===S.user.id);

@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — generated placeholder product art: a perfume bottle drawn in inline SVG and tinted by the product's hue.
+/* Liladip — generated placeholder product art: a perfume bottle drawn in inline SVG and tinted by the product's hue.
    It is shown until real photographs are added in Admin. */
 let artN=0;
 const trunc=(s,n)=>{s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s};

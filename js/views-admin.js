@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — admin views: products, orders, settings, product form. */
+/* Liladip — admin views: products, orders, settings, product form. */
 async function viewAdmin(){
   if(!isAdmin())return `<h2 class="sec">Admin</h2><div class="empty">Administrator access required. <a href="#/account" style="color:var(--accent)">Sign in</a>${demoHint()}</div>`;
   const tab=S.adminTab;

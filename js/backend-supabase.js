@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — Supabase backend, used when CFG.mode is 'supabase'.
+/* Liladip — Supabase backend, used when CFG.mode is 'supabase'.
    Prices, stock and delivery fees are enforced in the database (see sql/schema.sql); the checks
    in the browser are for usability only. Security comes from row-level security and place_order(). */
 const supabaseBackend=(()=>{

@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — storefront views: home, collection, product, bag, checkout, order confirmation. */
+/* Liladip — storefront views: home, collection, product, bag, checkout, order confirmation. */
 /* ============ VIEWS ============ */
 const stBadge=p=>p.stock<=0?'<span class="st bad">Sold out</span>':p.stock<=CFG.lowStock?`<span class="st warn">Only ${p.stock} left</span>`:'<span class="st ok">In stock</span>';
 const plural=(n,w)=>n+' '+w+(n===1?'':'s');

@@ -1,4 +1,4 @@
-AURELLE FRAGRANCE STORE
+LILADIP MALDIVES FRAGRANCE STORE
 =======================
 
 This is the perfume edition of the storefront. Every function is the same as in
@@ -28,6 +28,40 @@ The perfume store is deliberately laid out differently from the tech store:
 Portrait photos (4:5) suit the product images best.
 The text under "Who are you shopping for?" and the delivery and payment notes
 on the home page are placeholders you can edit in js/views-store.js.
+
+DESIGN STYLES (SEVEN TO CHOOSE FROM)
+In demo mode a small switcher sits in the bottom-left corner of every page:
+buttons 1 to 7 change the whole look of the store at once, so a client can
+compare. Only the appearance changes; every function stays the same. The last
+choice is remembered in the browser, and a link ending in ?design=noir opens
+that design directly.
+  1 Arch       The original: arched windows, dark or light (the sun/moon
+               button switches between them; the other designs have a fixed
+               palette).
+  2 Bold       Yellow blocks, thick black outlines and hard offset shadows,
+               heavy Poppins type. Playful and loud, close to the logo.
+  3 Noir       Black and yellow gold, thin double frames, spaced capitals.
+  4 Editorial  Paper white, black type in Lora, thin rules, a yellow
+               highlighter mark behind headings.
+  5 Soft       Cream and yellow, circular images, pill buttons, rounded cards.
+  6 Capsule    Graphite with tall capsule-shaped images and a yellow sun behind
+               the hero bottle.
+  7 Deco       Art Deco: stepped frame corners, a sunburst hero, cream page
+               with a black header and footer.
+To choose one design for the live store, open js/config.js, set
+design:'noir' (or any name above) and designSwitcher:false. The switcher is
+never shown in live (supabase) mode. The styles are in css/designs.css, one
+block per design, and use two extra bundled fonts (Poppins, Lora; licence
+files are in css/fonts).
+
+BRAND AND COLOURS
+The store uses the client's logo (img folder, SVG so it stays sharp at any
+size) and its two colours: yellow #ffde59 and black. The header is always
+yellow with the black logo; the announcement strip, hero and footer are always
+black with yellow. The page itself follows the visitor's light or dark setting
+(cream with black text, or near-black with yellow accents). To adjust the
+colours, change --brand (yellow) and the other values at the top of
+css/style.css. The favicon (browser tab icon) is img/favicon.svg.
 
 FONTS
   The fonts are bundled in css/fonts (Marcellus for headings and prices, Jost for
@@ -68,10 +102,11 @@ MANAGING CATEGORIES AND SCENTS (Admin > Categories and scents)
   product form lets the administrator pick from these lists.
 
 The 12 sample products and the brands are placeholders; delete or edit them in
-the admin panel. The "AURELLE" name is a placeholder too: change it in
-index.html (title and the brand link) and in the footer.
+the admin panel. The store name and logo come from the client (Liladip Maldives). The logo
+files are in the img folder (SVG, black and yellow versions). The page title,
+header logo and footer logo are set in index.html. Order numbers start with LD-.
 
-The demo uses its own browser storage keys (au_...), so it does not clash with
+The demo uses its own browser storage keys (au_...; the prefix is internal and can stay), so it does not clash with
 the tech edition if both are opened from the same web address.
 
 If you already ran an earlier schema.sql in a Supabase project, run this

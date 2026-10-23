@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — demo backend, used when CFG.mode is 'demo'.
+/* Liladip — demo backend, used when CFG.mode is 'demo'.
    Simulates the database and sign-in entirely inside the visitor's browser (localStorage).
    Nothing is sent anywhere, and nothing is shared between visitors. It follows the same rules as
    sql/schema.sql (pricing, stock, delivery fee, cancellation restores stock) so the behaviour is representative. */
@@ -97,7 +97,7 @@ const demoBackend=(()=>{
       const st=settings(),fee=area==='male'?(sub>st.delivery_male_free_above?0:st.delivery_male_fee):0,tax=Math.round(sub*st.tax_rate*100)/100;
       lines.forEach(l=>{all.find(x=>x.id===l.id).stock-=l.qty});set(KEY.p,all);
       const n=get(KEY.n,1001);set(KEY.n,n+1);
-      const order={uid:'o'+n,id:'AU-'+n,userId:(me()||{}).id||null,created:new Date().toISOString(),status:'Pending',payment,area,
+      const order={uid:'o'+n,id:'LD-'+n,userId:(me()||{}).id||null,created:new Date().toISOString(),status:'Pending',payment,area,
         customer:{email,first,last,phone,address,island,atoll},items:lines,shipping:fee,tax,total:sub+fee+tax};
       const os=get(KEY.o,[]);os.unshift(order);set(KEY.o,os);
       return clone(order);

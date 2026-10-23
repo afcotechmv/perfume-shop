@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — product page image gallery: arrows, thumbnails, touch swipe, keyboard arrows. */
+/* Liladip — product page image gallery: arrows, thumbnails, touch swipe, keyboard arrows. */
 function initGallery(){
   const g=$('#gallery');if(!g)return;
   const box=g.closest('.pleft'),slides=[...g.querySelectorAll('.gs')];

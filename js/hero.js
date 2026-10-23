@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — hero slider behaviour: autoplay (driven by the progress bar), arrows, dots, touch swipe,
+/* Liladip — hero slider behaviour: autoplay (driven by the progress bar), arrows, dots, touch swipe,
    keyboard arrows, pause on hover/focus, pointer parallax. Respects "reduce motion" (no autoplay). */
 function initHero(){
   const hero=$('#hero');if(!hero)return;

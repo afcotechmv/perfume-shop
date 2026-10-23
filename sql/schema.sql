@@ -1,5 +1,5 @@
 -- =====================================================================
--- AURELLE fragrance store: Supabase schema
+-- Liladip fragrance store: Supabase schema
 -- Run once in the Supabase SQL Editor. The script is re-runnable.
 -- Design rules:
 --   * Prices, stock and delivery fees are decided by the database, never by the browser.
@@ -273,7 +273,7 @@ begin
 
   insert into public.orders (order_no, user_id, email, first_name, last_name, phone, area, address, island, atoll,
                              payment_method, subtotal, delivery_fee, tax, total, delivery_note)
-  values ('AU-' || nextval('public.order_no_seq'), auth.uid(), v_email, v_first, v_last, v_phone, p_area,
+  values ('LD-' || nextval('public.order_no_seq'), auth.uid(), v_email, v_first, v_last, v_phone, p_area,
           v_address, v_island, v_atoll, p_payment, v_sub, v_fee, v_tax, v_sub + v_fee + v_tax,
           case when p_area = 'island' then 'Island delivery: fee to be arranged with customer' else '' end)
   returning * into v_order;

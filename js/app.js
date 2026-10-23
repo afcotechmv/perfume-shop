@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — chrome, drawer, router, event handlers, form submission and start-up. */
+/* Liladip — chrome, drawer, router, event handlers, form submission and start-up. */
 /* ============ CHROME / DRAWER ============ */
 function updateChrome(){
   $('#cc').textContent=S.cart.reduce((s,c)=>s+c.qty,0);
@@ -48,7 +48,7 @@ document.addEventListener('click',async e=>{
   if(a==='add'){const n=el.dataset.q==='pd'?S.pdQty:1;addToCart(id,n)}
   else if(a==='drawer')openDrawer();
   else if(a==='closeall')closeAll();
-  else if(a==='theme'){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#150b14';r.dataset.theme=dark?'light':'dark'}
+  else if(a==='theme'){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0d0c09';r.dataset.theme=dark?'light':'dark'}
   else if(a==='cat'||a==='aud'||a==='brand'||a==='clear'){
     if(el.dataset.go||a==='clear')S.filter={...S.filter,cat:'All',aud:'All',brand:'All',q:'',inStock:false};
     if(a!=='clear')S.filter[a]=el.dataset.v;
@@ -194,6 +194,21 @@ document.addEventListener('submit',async e=>{
   finally{if(btn)btn.disabled=false}
 });
 
+/* ============ DESIGN SWITCHER (demo mode only) ============ */
+const DESIGNS=[['arch','Arch'],['bold','Bold'],['noir','Noir'],['editorial','Editorial'],['soft','Soft'],['capsule','Capsule'],['deco','Deco']];
+function drawSwitcher(){
+  const el=$('#dsw');if(!el)return;
+  const cur=document.documentElement.getAttribute('data-design')||'arch';
+  el.hidden=false;
+  el.innerHTML=`<span class="dn">${esc((DESIGNS.find(x=>x[0]===cur)||DESIGNS[0])[1])}</span>`+DESIGNS.map((x,i)=>`<button type="button" data-design="${x[0]}" class="${x[0]===cur?'on':''}" title="${x[1]}" aria-label="Design ${i+1}: ${x[1]}" aria-pressed="${x[0]===cur}">${i+1}</button>`).join('');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('#dsw [data-design]');if(!b)return;
+  document.documentElement.setAttribute('data-design',b.getAttribute('data-design'));
+  try{localStorage.setItem('ld_design',b.getAttribute('data-design'))}catch(err){}
+  drawSwitcher();
+});
+
 /* ============ BOOT ============ */
 function setupScreen(msg){
   $('#app').innerHTML=`<h2 class="sec">Setup required</h2><div class="panel" style="max-width:640px"><p>${esc(msg)}</p>
@@ -201,7 +216,7 @@ function setupScreen(msg){
   updateChrome();
 }
 (async()=>{
-  if(CFG.mode==='demo'){const b=$('#demobar');if(b)b.hidden=false}
+  if(CFG.mode==='demo'){const b=$('#demobar');if(b)b.hidden=false;if(CFG.designSwitcher!==false)drawSwitcher()}
   const init=await BACKEND.init();
   if(init.error)return setupScreen(init.error);
   try{

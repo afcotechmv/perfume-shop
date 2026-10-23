@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — application state, cart and totals. */
+/* Liladip — application state, cart and totals. */
 /* ============ STATE ============ */
 const S={
   products:[],cart:ls.get('au_cart',[]),user:null,lastOrder:lastOrderGet(),

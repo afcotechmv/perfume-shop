@@ -1,5 +1,5 @@
 "use strict";
-/* AURELLE — product images: display helper and in-browser resizing before saving. */
+/* Liladip — product images: display helper and in-browser resizing before saving. */
 
 /* The image shown for a product in the catalogue, hero banner and cart: its first image,
    or the generated placeholder when it has none. */

@@ -6,19 +6,19 @@
 <title>Liladip Maldives — Fine Fragrances</title>
 <meta name="theme-color" content="#ffde59">
 <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-<link rel="stylesheet" href="css/style.css?v=1.6">
-<link rel="stylesheet" href="css/designs.css?v=1.6">
-<script src="js/config.js?v=1.6"></script>
+<link rel="stylesheet" href="css/style.css?v=1.8">
+<link rel="stylesheet" href="css/designs.css?v=1.8">
+<script src="js/config.js?v=1.8"></script>
 <script>
-/* Apply the chosen design before the page paints. In demo mode with the switcher on, the visitor's last choice (or ?design=name) is used; otherwise CFG.design. */
-(function(){var d=CFG.design||'arch';try{if(CFG.mode==='demo'&&CFG.designSwitcher!==false){var q=(location.search.match(/[?&]design=([a-z]+)/)||[])[1],s=localStorage.getItem('ld_design');d=q||s||d}}catch(e){}document.documentElement.setAttribute('data-design',d)})();
+/* Apply the design and the light/dark choice before the page paints: CFG.design and CFG.theme, then (in demo mode with the switcher on) the visitor's last design, and the visitor's last light/dark choice. */
+(function(){var r=document.documentElement,d=CFG.design||'editorial',t=CFG.theme!=='auto'?(CFG.theme||'light'):null;try{if(CFG.mode==='demo'&&CFG.designSwitcher!==false){var q=(location.search.match(/[?&]design=([a-z]+)/)||[])[1],s=localStorage.getItem('ld_design');d=q||s||d}var th=localStorage.getItem('ld_theme');if(th==='light'||th==='dark')t=th}catch(e){}r.setAttribute('data-design',d);if(t)r.setAttribute('data-theme',t)})();
 </script>
 </head>
 <body>
 <div class="ann" id="ann">Free delivery in Malé on orders above MVR 500. Delivery to the islands is arranged with you.</div>
 <header class="top"><div class="wrap nav">
   <nav id="mainnav" aria-label="Main"></nav>
-  <a href="#/" class="brand" aria-label="Liladip Maldives, home"><img class="lb" src="img/liladip-word-black.svg" alt="Liladip" width="101" height="40"><img class="ly" src="img/liladip-word-yellow.svg" alt="" width="101" height="40" aria-hidden="true"></a>
+  <a href="#/" class="brand" aria-label="Liladip Maldives, home"><img class="lb" src="img/liladip-full-black.svg" alt="Liladip Maldives" width="136" height="58"><img class="ly" src="img/liladip-full-yellow.svg" alt="" width="136" height="58" aria-hidden="true"></a>
   <div class="acts">
     <button class="ibtn" data-act="theme" title="Switch between light and dark" aria-label="Switch between light and dark"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5a6.5 6.5 0 0 0 0 13z" fill="currentColor"/></svg></button>
     <a class="ibtn" id="acct" href="#/account">Account</a>
@@ -31,7 +31,7 @@
   <div><div class="fb"><img src="img/liladip-full-yellow.svg" alt="Liladip Maldives" width="216" height="92"></div><p>Fine fragrances from independent brands. Prototype storefront with placeholder products and prices.</p></div>
   <div><h4>Shop</h4><ul id="fshop"></ul></div>
   <div><h4>Your order</h4><ul><li><a href="#/account">Account</a></li><li><a href="#/cart">Your bag</a></li><li><a href="#/checkout">Checkout</a></li></ul></div>
-</div><div class="fine">Front-end build v1.6</div></div></footer>
+</div><div class="fine">Front-end build v1.8</div></div></footer>
 <div class="ov" id="ov" data-act="closeall"></div>
 <aside id="drawer" aria-label="Your bag"></aside>
 <div id="modal"></div>
@@ -41,18 +41,18 @@
 <!-- Supabase client library (pinned version) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
 <!-- Application scripts: order matters (each file uses the ones above it) -->
-<script src="js/utils.js?v=1.6"></script>
-<script src="js/art.js?v=1.6"></script>
-<script src="js/images.js?v=1.6"></script>
-<script src="js/backend-supabase.js?v=1.6"></script>
-<script src="js/backend-demo.js?v=1.6"></script>
-<script src="js/backend.js?v=1.6"></script>
-<script src="js/state.js?v=1.6"></script>
-<script src="js/views-store.js?v=1.6"></script>
-<script src="js/views-account.js?v=1.6"></script>
-<script src="js/views-admin.js?v=1.6"></script>
-<script src="js/hero.js?v=1.6"></script>
-<script src="js/gallery.js?v=1.6"></script>
-<script src="js/app.js?v=1.6"></script>
+<script src="js/utils.js?v=1.8"></script>
+<script src="js/art.js?v=1.8"></script>
+<script src="js/images.js?v=1.8"></script>
+<script src="js/backend-supabase.js?v=1.8"></script>
+<script src="js/backend-demo.js?v=1.8"></script>
+<script src="js/backend.js?v=1.8"></script>
+<script src="js/state.js?v=1.8"></script>
+<script src="js/views-store.js?v=1.8"></script>
+<script src="js/views-account.js?v=1.8"></script>
+<script src="js/views-admin.js?v=1.8"></script>
+<script src="js/hero.js?v=1.8"></script>
+<script src="js/gallery.js?v=1.8"></script>
+<script src="js/app.js?v=1.8"></script>
 </body>
 </html>

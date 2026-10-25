@@ -29,37 +29,30 @@ Portrait photos (4:5) suit the product images best.
 The text under "Who are you shopping for?" and the delivery and payment notes
 on the home page are placeholders you can edit in js/views-store.js.
 
-DESIGN STYLES (SEVEN TO CHOOSE FROM)
-In demo mode a small switcher sits in the bottom-left corner of every page:
-buttons 1 to 7 change the whole look of the store at once, so a client can
-compare. Only the appearance changes; every function stays the same. The last
-choice is remembered in the browser, and a link ending in ?design=noir opens
-that design directly.
-  1 Arch       The original: arched windows, dark or light (the sun/moon
-               button switches between them; the other designs have a fixed
-               palette).
-  2 Bold       Yellow blocks, thick black outlines and hard offset shadows,
-               heavy Poppins type. Playful and loud, close to the logo.
-  3 Noir       Black and yellow gold, thin double frames, spaced capitals.
-  4 Editorial  Paper white, black type in Lora, thin rules, a yellow
-               highlighter mark behind headings.
-  5 Soft       Cream and yellow, circular images, pill buttons, rounded cards.
-  6 Capsule    Graphite with tall capsule-shaped images and a yellow sun behind
-               the hero bottle.
-  7 Deco       Art Deco: stepped frame corners, a sunburst hero, cream page
-               with a black header and footer.
-To choose one design for the live store, open js/config.js, set
-design:'noir' (or any name above) and designSwitcher:false. The switcher is
-never shown in live (supabase) mode. The styles are in css/designs.css, one
-block per design, and use two extra bundled fonts (Poppins, Lora; licence
-files are in css/fonts).
+DESIGN: EDITORIAL (CHOSEN BY THE CLIENT) WITH LIGHT AND DARK MODE
+The store uses the "Editorial" design: yellow header with the full Liladip
+Maldives logo, paper-white page (or near-black in dark mode), Lora headings,
+thin rules, a yellow highlighter mark behind headings and a yellow band for the
+delivery notes. The hero is a dark panel across the full width of the screen with
+the bottle floating on it (real photos, once added, stay as a photo tile on that
+panel) and a yellow band along its bottom edge. The sun/moon button in the header switches between light and
+dark and the choice is remembered in the visitor's browser. In js/config.js:
+  design:'editorial'      the design in use
+  theme:'light'           first-time mode: 'light', 'dark', or 'auto' (follows
+                          the visitor's phone or computer setting)
+  designSwitcher:false    set to true (demo mode only) to show the small
+                          bottom-left switcher for comparing the other designs
+The other designs (arch, bold, noir, soft, capsule, deco) are still in
+css/designs.css for reference; set design to one of those names to use it.
+They use two extra bundled fonts (Poppins, Lora; licences in css/fonts).
+The header logo is the full lockup, including "maldives" (img folder: SVG, black
+and yellow versions).
 
 BRAND AND COLOURS
 The store uses the client's logo (img folder, SVG so it stays sharp at any
 size) and its two colours: yellow #ffde59 and black. The header is always
-yellow with the black logo; the announcement strip, hero and footer are always
-black with yellow. The page itself follows the visitor's light or dark setting
-(cream with black text, or near-black with yellow accents). To adjust the
+yellow with the black logo, in both modes; the announcement strip and footer
+are black with yellow. To adjust the
 colours, change --brand (yellow) and the other values at the top of
 css/style.css. The favicon (browser tab icon) is img/favicon.svg.
 

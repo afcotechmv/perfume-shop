@@ -44,12 +44,12 @@ function art(p){
    <linearGradient id="${id}q" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h} 72% 60%)"/><stop offset="1" stop-color="hsl(${h} 78% 36%)"/></linearGradient>
    <clipPath id="${id}c">${K.clip}</clipPath>
   </defs>
-  <rect width="400" height="400" fill="url(#${id}b)"/>
+  <rect class="abg" width="400" height="400" fill="url(#${id}b)"/>
   <ellipse cx="200" cy="250" rx="190" ry="150" fill="url(#${id}h)"/>
   <ellipse cx="200" cy="346" rx="124" ry="12" fill="url(#${id}s)"/>
   ${K.body.replace('@',glass)}
   <g clip-path="url(#${id}c)"><rect x="90" y="${K.liq}" width="220" height="260" fill="url(#${id}q)" opacity=".92"/><rect x="90" y="${K.liq}" width="220" height="3" fill="#fff" opacity=".35"/></g>
   ${K.body.replace('@','fill="none" stroke="hsl('+h+' 45% 82% / .55)" stroke-width="1.6"')}
   ${K.cap}${K.lab}${K.hl}
-  <text x="200" y="378" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="16" fill="hsl(${h} 45% 80%)" opacity=".8">${esc(trunc(p.name,26))}</text></svg>`;
+  <text class="acap" x="200" y="378" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="16" fill="hsl(${h} 45% 80%)" opacity=".8">${esc(trunc(p.name,26))}</text></svg>`;
 }

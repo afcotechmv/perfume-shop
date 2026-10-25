@@ -48,7 +48,7 @@ document.addEventListener('click',async e=>{
   if(a==='add'){const n=el.dataset.q==='pd'?S.pdQty:1;addToCart(id,n)}
   else if(a==='drawer')openDrawer();
   else if(a==='closeall')closeAll();
-  else if(a==='theme'){const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0d0c09';r.dataset.theme=dark?'light':'dark'}
+  else if(a==='theme'){const r=document.documentElement,cur=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),nx=cur==='dark'?'light':'dark';r.dataset.theme=nx;try{localStorage.setItem('ld_theme',nx)}catch(e){}}
   else if(a==='cat'||a==='aud'||a==='brand'||a==='clear'){
     if(el.dataset.go||a==='clear')S.filter={...S.filter,cat:'All',aud:'All',brand:'All',q:'',inStock:false};
     if(a!=='clear')S.filter[a]=el.dataset.v;

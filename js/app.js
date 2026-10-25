@@ -194,7 +194,10 @@ document.addEventListener('submit',async e=>{
   finally{if(btn)btn.disabled=false}
 });
 
-/* ============ DESIGN SWITCHER (demo mode only) ============ */
+/* ============ DESIGN SWITCHER (switched off) ============
+   Showed the numbers 1-7 in a corner so a client could compare designs. Not used now that the Editorial design is chosen.
+   To restore: remove this comment wrapper, restore css/designs.css and #dsw in index.html from the design archive,
+   and un-comment the drawSwitcher() call in the BOOT block below.
 const DESIGNS=[['arch','Arch'],['bold','Bold'],['noir','Noir'],['editorial','Editorial'],['soft','Soft'],['capsule','Capsule'],['deco','Deco']];
 function drawSwitcher(){
   const el=$('#dsw');if(!el)return;
@@ -208,6 +211,7 @@ document.addEventListener('click',e=>{
   try{localStorage.setItem('ld_design',b.getAttribute('data-design'))}catch(err){}
   drawSwitcher();
 });
+*/
 
 /* ============ BOOT ============ */
 function setupScreen(msg){
@@ -216,7 +220,7 @@ function setupScreen(msg){
   updateChrome();
 }
 (async()=>{
-  if(CFG.mode==='demo'){const b=$('#demobar');if(b)b.hidden=false;if(CFG.designSwitcher!==false)drawSwitcher()}
+  if(CFG.mode==='demo'){const b=$('#demobar');if(b)b.hidden=false;/* drawSwitcher(); (design switcher switched off) */}
   const init=await BACKEND.init();
   if(init.error)return setupScreen(init.error);
   try{

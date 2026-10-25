@@ -6,59 +6,45 @@ the tech edition (catalogue, product pages with image galleries, rotating hero
 banner, cart, guest or account checkout, admin products/orders/settings, demo
 and Supabase modes). Only the content and design have changed.
 
-DESIGN
-The perfume store is deliberately laid out differently from the tech store:
-  - Header: logo centred, navigation on the left, account and bag on the right,
-    with a delivery announcement above it.
-  - Home page order: hero, "Who are you shopping for?" (three arched doorways
-    for Women's, Men's and Unisex), a sliding row of signature fragrances,
-    "Browse by brands", then delivery and payment notes.
-  - Hero: a dark stage tinted by each fragrance, an arched window for the
-    bottle, the fragrance notes on one side and the details on the other. The
-    arch image rises like a curtain when the slide changes. Choose a slide by
-    its name at the bottom, by swiping, or with the arrow keys; it also
-    changes by itself. The hero is always dark, in both light and dark themes.
-  - Collection page: filters on the left (Category, Brand, and Scent when it is turned on), tall
-    arched product cards, search by name, brand or note (accents ignored).
-  - Product page: arched image gallery, other details listed beneath, and the
-    notes shown as a pyramid when scent information is turned on (rows labelled
-    "Top notes", "Heart notes" and "Base notes" in the admin form).
+DESIGN (EDITORIAL), WITH LIGHT AND DARK MODE
+The client chose the "Editorial" design: a yellow header with the full Liladip
+Maldives logo, a paper-white page (near-black in dark mode), Lora headings, thin
+rules, square images, a yellow highlighter mark behind headings, and a yellow
+band for the delivery notes.
+  - Header: logo centred, navigation on the left, theme button, account and bag
+    on the right, with a black delivery strip above it.
+  - Home page order: hero, "Who are you shopping for?", a sliding row of
+    signature fragrances, "Browse by brands", then delivery and payment notes.
+  - Hero: a brown panel and a yellow block behind it, both running edge to edge
+    across the screen (the brown one starts at the left edge, the yellow one
+    shows at the right and bottom). The bottle sits on the panel with the
+    fragrance details beside it; slide names and a progress line sit at the
+    bottom. It changes by itself, by clicking a name, by swiping, or with the
+    arrow keys. Real photos, once added, appear as a photo tile on the panel.
+  - Collection page: filters on the left (Category, Brand, and Scent when it is
+    turned on), square product cards, search by name, brand or note.
+  - Product page: image gallery, details beneath, and the notes shown as a
+    pyramid when scent information is turned on.
   - The customer's cart is called the bag. Prices, checkout, orders, admin and
-    both modes work exactly as before.
+    both modes work as before.
+LIGHT AND DARK: the sun/moon button in the header switches and the visitor's
+choice is remembered in their browser. In js/config.js, theme:'light' is what a
+first-time visitor sees; use 'dark', or 'auto' to follow their phone or computer.
+COLOURS: yellow #ffde59 and black from the client's logo. Change them in the
+first block of css/style.css (--brand for the yellow; the light and dark sets
+are marked). The logo is the full lockup, including "maldives", in the img
+folder (SVG, black and yellow versions); the browser-tab icon is img/favicon.svg.
+THE DESIGN NUMBERS: the small 1-7 design switcher used to compare designs is
+switched off and commented out (index.html and the DESIGN SWITCHER block in
+js/app.js). The other designs are not part of this site; they are kept in the
+separate archive zip delivered with it.
 Portrait photos (4:5) suit the product images best.
 The text under "Who are you shopping for?" and the delivery and payment notes
 on the home page are placeholders you can edit in js/views-store.js.
 
-DESIGN: EDITORIAL (CHOSEN BY THE CLIENT) WITH LIGHT AND DARK MODE
-The store uses the "Editorial" design: yellow header with the full Liladip
-Maldives logo, paper-white page (or near-black in dark mode), Lora headings,
-thin rules, a yellow highlighter mark behind headings and a yellow band for the
-delivery notes. The hero is a dark panel across the full width of the screen with
-the bottle floating on it (real photos, once added, stay as a photo tile on that
-panel) and a yellow band along its bottom edge. The sun/moon button in the header switches between light and
-dark and the choice is remembered in the visitor's browser. In js/config.js:
-  design:'editorial'      the design in use
-  theme:'light'           first-time mode: 'light', 'dark', or 'auto' (follows
-                          the visitor's phone or computer setting)
-  designSwitcher:false    set to true (demo mode only) to show the small
-                          bottom-left switcher for comparing the other designs
-The other designs (arch, bold, noir, soft, capsule, deco) are still in
-css/designs.css for reference; set design to one of those names to use it.
-They use two extra bundled fonts (Poppins, Lora; licences in css/fonts).
-The header logo is the full lockup, including "maldives" (img folder: SVG, black
-and yellow versions).
-
-BRAND AND COLOURS
-The store uses the client's logo (img folder, SVG so it stays sharp at any
-size) and its two colours: yellow #ffde59 and black. The header is always
-yellow with the black logo, in both modes; the announcement strip and footer
-are black with yellow. To adjust the
-colours, change --brand (yellow) and the other values at the top of
-css/style.css. The favicon (browser tab icon) is img/favicon.svg.
-
 FONTS
-  The fonts are bundled in css/fonts (Marcellus for headings and prices, Jost for
-  body text), so the store does not need a font service and looks the same
+  The fonts are bundled in css/fonts (Lora for headings, Jost for body text,
+  Marcellus for the generated bottle art), so the store does not need a font service and looks the same
   offline. Both are open-licence fonts; their licence files are in the same
   folder. To use a different heading font, add its file to css/fonts, add an
   @font-face line at the top of css/style.css, and change the --display value
@@ -124,7 +110,9 @@ FILES
 -----
 
 index.html              Page shell; loads the scripts below in order.
-css/style.css           All styling (dark theme, with a light variant).
+css/style.css           All styling (Editorial design, light and dark modes).
+css/fonts/              Bundled fonts (Lora, Jost, Marcellus) and their licences.
+img/                    Logo (SVG, black and yellow versions) and browser-tab icon.
 js/config.js            Mode, Supabase URL and anon key, currency, defaults.
                         This is the only file you must edit.
 js/utils.js             Helpers (formatting, storage, toast messages).

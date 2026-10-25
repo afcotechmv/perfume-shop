@@ -7,12 +7,8 @@ const CFG={
   mode:'demo',
   // Project Settings > API in the Supabase dashboard. Use the anon / publishable key only. NEVER the service_role / secret key.
   supabase:{url:'https://YOUR-PROJECT.supabase.co',anonKey:'YOUR-ANON-PUBLIC-KEY'},
-  // Visual design chosen by the client: 'editorial'. (Others kept for reference: 'arch', 'bold', 'noir', 'soft', 'capsule', 'deco'.)
-  design:'editorial',
   // First-time colour mode: 'light', 'dark', or 'auto' (follow the visitor's phone/computer setting). The sun/moon button in the header changes it and is remembered.
   theme:'light',
-  // Demo mode only: shows the small design switcher in the bottom-left corner so a client can compare the designs. Set to false to hide it.
-  designSwitcher:false,
   currency:'MVR',
   images:{maxPerProduct:6,maxDim:1200,quality:0.82,demo:{maxDim:800,quality:0.72}},  // images are resized in the browser before saving (demo uses smaller ones because browser storage is limited)
   showScents:false,   // overwritten at start-up from the store settings (Admin > Settings > Show scent information)

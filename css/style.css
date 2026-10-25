@@ -1,29 +1,31 @@
 /* Fonts are bundled in css/fonts (no internet connection to a font service is needed).
-   Headings and prices use Marcellus (even stroke weight, easy to read). Body text uses Jost.
+   Headings use Lora, body text uses Jost, and the generated bottle art uses Marcellus.
    To try another heading font, change --display below. */
 @font-face{font-family:'Marcellus';src:url(fonts/marcellus-latin-400-normal.woff2) format('woff2');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'Jost';src:url(fonts/jost-latin-wght-normal.woff2) format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'Lora';src:url(fonts/lora-latin-500-normal.woff2) format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'Lora';src:url(fonts/lora-latin-600-normal.woff2) format('woff2');font-weight:600;font-style:normal;font-display:swap}
 :root{
   /* Brand: Liladip yellow #ffde59 and black, taken from the client's logo. */
   --brand:#ffde59;--brand-ink:#14110a;
-  --bg:#0d0c09;--bg2:#17150e;--bg3:#221f13;--line:#3b3519;--text:#f8f3e1;--muted:#bdb594;
-  --accent:#ffde59;--accent2:#f2b01e;--accent-ink:#14110a;--ok:#8fe0a8;--warn:#eab44e;--bad:#ff8080;--art:#17150e;
+  /* LIGHT mode (default) */
+  --bg:#faf8f0;--bg2:#ffffff;--bg3:#f0ecdb;--line:#d9d3ba;--rule:#14120a;--text:#14120a;--muted:#5b5842;
+  --accent:#14120a;--accent2:#14120a;--accent-ink:#14110a;--ok:#12805a;--warn:#8a5a00;--bad:#b3243b;--art:#14120a;
   --gold:linear-gradient(135deg,#ffeb94 0%,#ffde59 48%,#f6c928 100%);
-  --btn:var(--gold);--btn-ink:#14110a;
-  --shadow:0 18px 50px rgba(0,0,0,.6);
-  --display:'Marcellus','Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --btn:#14120a;--btn-ink:#ffde59;
+  --shadow:0 12px 30px rgba(20,18,10,.12);
+  --mark:linear-gradient(transparent 58%,#ffde59 58%,#ffde59 90%,transparent 90%);   /* highlighter behind headings */
+  --display:'Lora',Georgia,'Times New Roman',serif;
   --serif:var(--display);
   --sans:'Jost','Avenir Next',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:var(--sans);
-  --stage:#0a0905;--ink:#f8f3e1;--ink2:#d2c9a8;--champ:#ffde59;
+  --stage:#0c0b06;--ink:#14120a;--ink2:#3f3c27;--champ:#14120a;
   --hh:clamp(600px,84vh,780px);
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:light){
-  :root:not([data-theme="dark"]){--bg:#fffbea;--bg2:#ffffff;--bg3:#fff1b5;--line:#e9d98f;--text:#14110a;--muted:#5f5937;--accent:#755800;--accent2:#b07a00;--ok:#12805a;--warn:#8a5a00;--bad:#b3243b;--art:#fff1b5;--btn:#14110a;--btn-ink:#ffde59;--shadow:0 18px 40px rgba(80,60,0,.14)}
-}
-:root[data-theme="light"]{--bg:#fffbea;--bg2:#ffffff;--bg3:#fff1b5;--line:#e9d98f;--text:#14110a;--muted:#5f5937;--accent:#755800;--accent2:#b07a00;--ok:#12805a;--warn:#8a5a00;--bad:#b3243b;--art:#fff1b5;--btn:#14110a;--btn-ink:#ffde59;--shadow:0 18px 40px rgba(80,60,0,.14)}
-:root[data-theme="dark"]{--bg:#0d0c09;--bg2:#17150e;--bg3:#221f13;--line:#3b3519;--text:#f8f3e1;--muted:#bdb594;--accent:#ffde59;--accent2:#f2b01e;--ok:#8fe0a8;--warn:#eab44e;--bad:#ff8080;--art:#17150e;--btn:var(--gold);--btn-ink:#14110a;--shadow:0 18px 50px rgba(0,0,0,.6)}
+/* DARK mode: chosen with the header button (or by the visitor's device when CFG.theme is 'auto') */
+:root[data-theme="dark"]{--bg:#121108;--bg2:#1b190e;--bg3:#262314;--line:#3a3620;--rule:#5d5832;--text:#f5f1de;--muted:#b6b091;--accent:#ffde59;--accent2:#ffde59;--ok:#8fe0a8;--warn:#eab44e;--bad:#ff8080;--btn:#ffde59;--btn-ink:#14120a;--shadow:0 12px 34px rgba(0,0,0,.6);--mark:linear-gradient(transparent 80%,#ffde59 80%,#ffde59 92%,transparent 92%)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]):not([data-theme="dark"]){--bg:#121108;--bg2:#1b190e;--bg3:#262314;--line:#3a3620;--rule:#5d5832;--text:#f5f1de;--muted:#b6b091;--accent:#ffde59;--accent2:#ffde59;--ok:#8fe0a8;--warn:#eab44e;--bad:#ff8080;--btn:#ffde59;--btn-ink:#14120a;--shadow:0 12px 34px rgba(0,0,0,.6);--mark:linear-gradient(transparent 80%,#ffde59 80%,#ffde59 92%,transparent 92%)}}
 
 html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 90px)}
 *{box-sizing:border-box}
@@ -377,3 +379,82 @@ footer a:hover,footer li button:hover{color:var(--brand)}
 .field input[type=checkbox],.chk input[type=checkbox]{width:auto;padding:0;flex:0 0 auto}
 
 .pinfo .buy{margin-top:26px}
+
+/* ---------- Editorial look: type, rules, square images, yellow highlights ---------- */
+h1,h2,h3,.cname,.fam,.plabel b{font-weight:500}
+header.top{border-bottom:1px solid #14120a;box-shadow:none}
+.nav nav a,.nav nav button,.ibtn{text-transform:uppercase;letter-spacing:.14em;font-size:.74rem}
+.nav nav a,.nav nav button{color:rgba(20,17,10,.8);font-weight:500}
+.ibtn{border-radius:0;border:1px solid #14120a}
+.ann{background:#14120a;color:#ffde59;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase}
+.sech{border-bottom:1px solid var(--rule);padding-bottom:12px;align-items:flex-end}
+.sech h2,.rt{display:inline;background:var(--mark);padding:0 .12em;-webkit-box-decoration-break:clone;box-decoration-break:clone;font-weight:600}
+.btn{border-radius:0;text-transform:uppercase;letter-spacing:.14em;font-size:.76rem}
+.btn:hover{box-shadow:none;filter:brightness(1.18)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--rule)}
+.btn.ghost:hover{background:#ffde59;color:#14120a;filter:none}
+.btn.danger{color:#fff}
+.hero .btn,.hero .btn:hover{background:var(--btn);color:var(--btn-ink)}
+.thumb{border-radius:0;box-shadow:0 0 0 1px var(--line)}
+.flag{left:0;bottom:0;transform:none;border-radius:0;background:#ffde59;color:#14120a}
+.card{text-align:left}
+.cbody{align-items:flex-start;padding:14px 0 0}
+.by{font-family:var(--sans);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.cname{font-size:1.25rem}
+.cname:hover{color:var(--text);text-decoration:underline;text-decoration-color:#ffde59;text-decoration-thickness:2px;text-underline-offset:3px}
+.price{font-family:var(--sans);font-size:1rem}
+.cbody .price{margin-bottom:12px}
+.add{padding:0;color:var(--text);border-bottom:2px solid #ffde59;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem}
+.add:hover{background:#ffde59;color:#14120a}
+.parch{border-radius:0;box-shadow:0 0 0 1px var(--line);aspect-ratio:4/5}
+.parch::after{display:none}
+.portal{display:block;text-align:left;color:var(--text)}
+.plabel{position:static;margin-top:14px;align-items:flex-start}
+.plabel b{font-size:1.7rem;color:var(--text);border-bottom:3px solid #ffde59;line-height:1.2}
+.plabel span{color:var(--muted);margin-top:4px}
+.fam{border-bottom:1px solid var(--rule);font-size:clamp(1.2rem,2.2vw,1.6rem)}
+.fam:hover{padding-left:14px;background:#ffde59;color:#14120a}
+.fam:hover i{color:#3f3c27}
+.bleed{background:#ffde59;color:#14120a}
+.promise h3{color:#14120a}
+.promise p{color:#3f3c27}
+.sq input,.field input,.field select,.field textarea,.rhead select{border-radius:0;border:1px solid var(--rule);background:var(--bg2)}
+.facet h3{font-family:var(--sans);font-size:.74rem;text-transform:uppercase;letter-spacing:.18em;color:var(--text)}
+.pimg{border-radius:0;box-shadow:0 0 0 1px var(--line)}
+.gt{border-radius:0}
+.copy h1{font-size:clamp(2.1rem,3.7vw,3.3rem);font-weight:600}
+.copy .by{font-family:var(--sans);font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2)}
+.copy .price{font-family:var(--sans);font-size:1.6rem}
+.copy .more{color:var(--ink);border-bottom:2px solid #ffde59}
+@media(min-width:901px){
+  .frame{grid-template-columns:auto minmax(0,470px);justify-content:center;gap:clamp(70px,9vw,130px)}
+  .tiers{display:none}
+}
+
+/* ---------- hero (Editorial): a brown panel and a yellow block behind it, both running edge to edge ---------- */
+.hero{--off:24px;--ink:#f5f1de;--ink2:#d4cdb0;--champ:#ffde59;--btn:#ffde59;--btn-ink:#14120a;background:var(--bg)}
+.hero::before{content:"";position:absolute;left:var(--off);right:0;top:var(--off);bottom:0;background:#ffde59;z-index:-2}
+.slide::before{inset:0 var(--off) var(--off) 0;background:radial-gradient(58% 95% at 30% 44%,hsl(var(--h) 38% 25%),hsl(var(--h) 32% 6%) 78%)}
+.frame{padding-bottom:calc(112px + var(--off))}
+.arch{aspect-ratio:4/5}
+.arch::before{display:none}
+.archin{border-radius:0;box-shadow:none;background:transparent;overflow:visible}
+.archin>svg{overflow:visible}
+.hero .archin svg .abg,.hero .archin svg .acap{display:none}
+.slide.active .archin{animation:riseIn 1s .1s cubic-bezier(.2,.8,.2,1) both}
+.hname{-webkit-text-stroke:1px rgba(245,241,222,.1)}
+.sparks{display:none}
+.hdot{color:color-mix(in srgb,var(--ink) 55%,transparent)}
+.hdot.on{color:var(--ink)}
+.hdot::after{height:3px;bottom:0;background:#ffde59}
+.htabs{bottom:calc(var(--off) + 22px)}
+.hbar{left:0;right:var(--off);bottom:var(--off);height:4px;background:rgba(245,241,222,.14)}
+.hbar i{background:#f5f1de}
+@media(min-width:901px){.arch{order:-1;width:clamp(270px,27vw,360px)}}
+@media(max-width:900px){
+  .hero{--off:14px}
+  .slide::before{background:radial-gradient(85% 55% at 50% 28%,hsl(var(--h) 38% 25%),hsl(var(--h) 32% 6%) 80%)}
+}
+/* generated bottle art in the three doorway tiles: crop slightly so the art's own caption does not show behind the label */
+.parch>svg{transform:scale(1.18);transform-origin:50% 38%}
+.portal:hover .parch>svg{transform:scale(1.24)}
